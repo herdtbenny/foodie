@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, LoaderCircle } from "lucide-react";
+import { ChevronDown, ExternalLink, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateRestaurant, type RestaurantPatch } from "@/lib/actions";
@@ -57,6 +57,124 @@ export function EditableTitle({ id, name }: { id: number; name: string }) {
   );
 }
 
+const NEW = "__neu";
+
+/** Ein Chip mit unsichtbarem nativem <select> darüber – öffnet auf dem iPhone das System-Menü */
+function SelectChip({
+  label,
+  value,
+  options,
+  onChange,
+  allowNew,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+  allowNew?: boolean;
+}) {
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState("");
+  const list = value && !options.includes(value) ? [value, ...options] : options;
+
+  if (adding) {
+    return (
+      <input
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          setAdding(false);
+          if (draft.trim()) onChange(draft.trim());
+          setDraft("");
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key === "Escape") {
+            setDraft("");
+            setAdding(false);
+          }
+        }}
+        placeholder={`Neue ${label}`}
+        aria-label={`Neue ${label}`}
+        className="glass w-40 rounded-full px-3.5 py-1.5 text-sm outline-none"
+      />
+    );
+  }
+
+  return (
+    <span
+      className={`press glass relative inline-flex items-center gap-1 rounded-full py-1.5 pr-2.5 pl-3.5 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
+        value ? "text-ink" : "text-muted"
+      }`}
+    >
+      {value || label}
+      <ChevronDown className="size-3.5 opacity-60" />
+      <select
+        value={value}
+        onChange={(e) => {
+          if (e.target.value === NEW) setAdding(true);
+          else onChange(e.target.value);
+        }}
+        aria-label={label}
+        className="absolute inset-0 size-full cursor-pointer appearance-none rounded-full opacity-0"
+      >
+        <option value="">Keine {label}</option>
+        {list.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+        {allowNew && <option value={NEW}>Neue {label} …</option>}
+      </select>
+    </span>
+  );
+}
+
+/** Direkt unter dem Namen: je ein Chip für Art und Küche */
+export function MetaChips({
+  id,
+  kind,
+  cuisine,
+  kinds,
+  cuisines,
+}: {
+  id: number;
+  kind: string | null;
+  cuisine: string | null;
+  kinds: string[];
+  cuisines: string[];
+}) {
+  const { pending, save } = useSave(id);
+  const [currentKind, setCurrentKind] = useState(kind ?? "");
+  const [currentCuisine, setCurrentCuisine] = useState(cuisine ?? "");
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <SelectChip
+        label="Art"
+        value={currentKind}
+        options={kinds}
+        onChange={(v) => {
+          setCurrentKind(v);
+          save({ kind: v || null }, v ? `Art: ${v}` : "Art entfernt", () => setCurrentKind(kind ?? ""));
+        }}
+      />
+      <SelectChip
+        label="Küche"
+        value={currentCuisine}
+        options={cuisines}
+        allowNew
+        onChange={(v) => {
+          setCurrentCuisine(v);
+          save({ cuisine: v || null }, v ? `Küche: ${v}` : "Küche entfernt", () => setCurrentCuisine(cuisine ?? ""));
+        }}
+      />
+      {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}
+    </div>
+  );
+}
+
 const fieldClass =
   "min-w-0 flex-1 bg-transparent py-3 text-right outline-none placeholder:text-muted/60 focus:text-left";
 
@@ -69,40 +187,25 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-/** Art, Küche, Adresse, Google-Maps-Link – speichern beim Verlassen des Feldes */
+/** Adresse und Google-Maps-Link – speichern beim Verlassen des Feldes */
 export function RestaurantInfo({
   id,
-  kind,
-  cuisine,
   address,
   mapsUrl,
-  kinds,
-  cuisines,
 }: {
   id: number;
-  kind: string | null;
-  cuisine: string | null;
   address: string | null;
   mapsUrl: string | null;
-  kinds: string[];
-  cuisines: string[];
 }) {
   const { pending, save } = useSave(id);
-  const [values, setValues] = useState({ cuisine: cuisine ?? "", address: address ?? "", mapsUrl: mapsUrl ?? "" });
-  const [currentKind, setCurrentKind] = useState(kind ?? "");
-  const saved = { cuisine: cuisine ?? "", address: address ?? "", mapsUrl: mapsUrl ?? "" };
+  const [values, setValues] = useState({ address: address ?? "", mapsUrl: mapsUrl ?? "" });
+  const saved = { address: address ?? "", mapsUrl: mapsUrl ?? "" };
 
-  function commit(key: "cuisine" | "address" | "mapsUrl", raw?: string) {
+  function commit(key: "address" | "mapsUrl", raw?: string) {
     const next = (raw ?? values[key]).trim();
     if (next === saved[key]) return;
-    const labels = { cuisine: "Küche", address: "Adresse", mapsUrl: "Google-Maps-Link" };
+    const labels = { address: "Adresse", mapsUrl: "Google-Maps-Link" };
     save({ [key]: next || null }, `${labels[key]} gespeichert`, () => setValues((v) => ({ ...v, [key]: saved[key] })));
-  }
-
-  function chooseKind(next: string) {
-    const value = currentKind === next ? "" : next;
-    setCurrentKind(value);
-    save({ kind: value || null }, value ? `Art: ${value}` : "Art entfernt", () => setCurrentKind(kind ?? ""));
   }
 
   return (
@@ -112,39 +215,8 @@ export function RestaurantInfo({
         {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}
       </div>
 
-      <div className="no-scrollbar -mx-2 flex gap-1.5 overflow-x-auto px-2 sm:-mx-4 sm:px-4">
-        {kinds.map((k) => (
-          <button
-            key={k}
-            type="button"
-            aria-pressed={currentKind === k}
-            onClick={() => chooseKind(k)}
-            className={`press shrink-0 rounded-full border px-3.5 py-2 text-sm transition-colors ${
-              currentKind === k ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted"
-            }`}
-          >
-            {k}
-          </button>
-        ))}
-      </div>
 
       <div className="divide-y divide-line card rounded-3xl">
-        <Row label="Küche">
-          <input
-            list="info-cuisines"
-            value={values.cuisine}
-            onChange={(e) => setValues((v) => ({ ...v, cuisine: e.target.value }))}
-            onBlur={() => commit("cuisine")}
-            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-            placeholder="z. B. Italienisch"
-            className={fieldClass}
-          />
-          <datalist id="info-cuisines">
-            {cuisines.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
-        </Row>
         <Row label="Adresse">
           <input
             value={values.address}

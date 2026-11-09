@@ -5,7 +5,7 @@ import { Avatar } from "@/components/avatar";
 import { DeleteButton } from "@/components/delete-button";
 import { NotesForm } from "@/components/notes-form";
 import { OrderedSwitch } from "@/components/ordered-switch";
-import { EditableTitle, RestaurantInfo } from "@/components/restaurant-info";
+import { EditableTitle, MetaChips, RestaurantInfo } from "@/components/restaurant-info";
 import { PersonReview } from "@/components/person-review";
 import { VisitedDate } from "@/components/visited-date";
 import { CategoryRating } from "@/components/category-rating";
@@ -40,15 +40,17 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         {visited ? "Bisherige" : "Wunschliste"}
       </Link>
 
-      <header className="-mt-1 space-y-1 px-2">
+      <header className="-mt-1 space-y-2 px-2">
         {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
         <h1 className="sr-only">{restaurant.name}</h1>
         <EditableTitle id={restaurant.id} name={restaurant.name} />
-        {(restaurant.kind || restaurant.cuisine || !visited) && (
-          <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
-            {[!visited && "Wunschliste", restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ")}
-          </p>
-        )}
+        <MetaChips
+          id={restaurant.id}
+          kind={restaurant.kind}
+          cuisine={restaurant.cuisine}
+          kinds={valuesOf(all, "kind")}
+          cuisines={valuesOf(all, "cuisine")}
+        />
         {restaurant.address && (
           <p className="flex items-start gap-1.5 text-sm text-muted">
             <MapPin className="mt-0.5 size-3.5 shrink-0" />
@@ -163,15 +165,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         </section>
       )}
 
-      <RestaurantInfo
-        id={restaurant.id}
-        kind={restaurant.kind}
-        cuisine={restaurant.cuisine}
-        address={restaurant.address}
-        mapsUrl={restaurant.mapsUrl}
-        kinds={valuesOf(all, "kind")}
-        cuisines={valuesOf(all, "cuisine")}
-      />
+      <RestaurantInfo id={restaurant.id} address={restaurant.address} mapsUrl={restaurant.mapsUrl} />
 
       <section className="space-y-3">
         <h2 className="px-2 font-display text-2xl font-semibold">Notizen</h2>
