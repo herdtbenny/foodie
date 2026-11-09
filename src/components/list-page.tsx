@@ -29,11 +29,7 @@ export async function ListPage({ status }: { status: Status }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <h1 className="font-display text-3xl font-semibold">{copy.title}</h1>
-        {restaurants.length > 0 && <p className="text-sm text-muted tabular-nums">{restaurants.length}</p>}
-      </div>
-
+      <h1 className="sr-only">{copy.title}</h1>
       {restaurants.length === 0 ? (
         <div className="flex flex-col items-center px-6 py-16 text-center">
           <div className="mb-5 flex size-16 items-center justify-center rounded-3xl border border-line text-muted">
