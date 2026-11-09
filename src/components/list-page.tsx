@@ -1,4 +1,4 @@
-import { Bookmark, Plus, Star } from "lucide-react";
+import { Heart, Plus, History } from "lucide-react";
 import Link from "next/link";
 import { listRestaurants, type Status } from "@/lib/restaurants";
 import { RestaurantList } from "./restaurant-list";
@@ -9,14 +9,14 @@ const COPY = {
     empty: "Noch kein Restaurant bewertet",
     hint: "Tragt ein, wo ihr wart, und gebt beide eure Note von 1 bis 10.",
     cta: "Restaurant eintragen",
-    icon: Star,
+    icon: History,
   },
   wunsch: {
     title: "Wollen wir hin",
     empty: "Die Wunschliste ist leer",
     hint: "Google-Maps-Link einfügen, fertig – so geht kein Tipp mehr verloren.",
     cta: "Auf die Wunschliste",
-    icon: Bookmark,
+    icon: Heart,
   },
 } as const;
 

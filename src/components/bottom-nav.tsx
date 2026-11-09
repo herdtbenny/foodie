@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Dices, Map, Plus, Star } from "lucide-react";
+import { Heart, Dices, Map, Plus, History } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,10 +9,10 @@ const itemClass =
 
 const LEFT = [
   { href: "/karte", label: "Karte", icon: Map },
-  { href: "/", label: "Bisherige", icon: Star },
+  { href: "/", label: "Bisherige", icon: History },
 ];
 const RIGHT = [
-  { href: "/wunschliste", label: "Wunschliste", icon: Bookmark },
+  { href: "/wunschliste", label: "Wunschliste", icon: Heart },
   { href: "/heute", label: "Wohin?", icon: Dices },
 ];
 

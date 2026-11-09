@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, LoaderCircle, PartyPopper } from "lucide-react";
+import { Heart, LoaderCircle, PartyPopper } from "lucide-react";
 import { useTransition } from "react";
 import { setStatus } from "@/lib/actions";
 import type { Status } from "@/lib/restaurants";
@@ -35,7 +35,7 @@ export function StatusToggle({ restaurantId, status }: { restaurantId: number; s
         title="Zurück auf die Wunschliste"
         className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:text-ink disabled:opacity-60"
       >
-        {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Bookmark className="size-4" />}
+        {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Heart className="size-4" />}
       </button>
     );
   }

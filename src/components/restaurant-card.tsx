@@ -1,4 +1,4 @@
-import { Bookmark, MapPin, Navigation, ThumbsUp } from "lucide-react";
+import { MapPin, Navigation, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
 import type { RestaurantSummary } from "@/lib/restaurants";
@@ -38,7 +38,6 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
               {formatScore(average)}
             </span>
           )}
-          {!visited && <Bookmark className="size-3.5 shrink-0 text-muted" aria-label="Wunschliste" />}
         </div>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
           {tags && <span className="truncate text-[11px] font-semibold tracking-wider uppercase">{tags}</span>}

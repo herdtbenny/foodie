@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ClipboardPaste, LoaderCircle, MapPin, MapPinOff, Star } from "lucide-react";
+import { Heart, ClipboardPaste, LoaderCircle, MapPin, MapPinOff, History } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 import { lookupMapsLink, saveRestaurant } from "@/lib/actions";
@@ -269,8 +269,8 @@ export function RestaurantForm({
         <div className="grid grid-cols-2 gap-1 rounded-full border border-line bg-surface p-1">
           {(
             [
-              ["wunsch", "Wunschliste", Bookmark],
-              ["besucht", "Waren wir schon", Star],
+              ["wunsch", "Wunschliste", Heart],
+              ["besucht", "Waren wir schon", History],
             ] as const
           ).map(([value, label, Icon]) => (
             <button
