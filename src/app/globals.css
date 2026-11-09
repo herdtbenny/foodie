@@ -25,14 +25,15 @@
   --color-pop: var(--pop);
   --color-german: var(--german);
   --color-evelyne: var(--evelyne);
-  --font-sans: var(--font-archivo);
-  --font-display: var(--font-archivo);
+  --font-sans: var(--font-figtree);
+  --font-display: var(--font-shrikhand);
 }
 
-/* Überschriften: dieselbe Schrift, schmal und kräftig */
+/* Shrikhand gibt es nur in einer Stärke – kein künstliches Fettdrucken */
 .font-display {
-  font-stretch: 72%;
-  letter-spacing: -0.005em;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
 }
 
 /* Nie seitlich scrollen – `clip` statt `hidden`, damit fixed/sticky weiter funktioniert */
@@ -90,7 +91,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 9999px;
-  font: 700 13px/1 var(--font-archivo), system-ui, sans-serif;
+  font: 700 13px/1 var(--font-figtree), system-ui, sans-serif;
   border: 2px solid var(--surface);
   font-variant-numeric: tabular-nums;
 }
@@ -121,12 +122,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font: 14px/1.35 var(--font-archivo), system-ui, sans-serif;
+  font: 14px/1.35 var(--font-figtree), system-ui, sans-serif;
   min-width: 140px;
 }
 .foodie-popup strong {
+  font-family: var(--font-shrikhand), serif;
+  font-weight: 400;
   font-size: 17px;
-  font-stretch: 72%;
 }
 .foodie-popup span {
   color: var(--muted);
@@ -144,7 +146,7 @@ body {
   cursor: pointer;
 }
 .leaflet-container {
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--font-figtree), system-ui, sans-serif;
 }
 
 

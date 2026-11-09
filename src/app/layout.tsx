@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo } from "next/font/google";
+import { Figtree, Shrikhand } from "next/font/google";
 import "./globals.css";
 
-const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], axes: ["wdth"] });
+const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
+// Retro-Diner-Schrift für Logo, Titel und Restaurant-Namen (gibt es nur in einer Stärke)
+const shrikhand = Shrikhand({ variable: "--font-shrikhand", subsets: ["latin"], weight: "400" });
 
 export const metadata: Metadata = {
   title: "Foodie",
@@ -21,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={`${archivo.variable} h-full antialiased`}>
+    <html lang="de" className={`${figtree.variable} ${shrikhand.variable} h-full antialiased`}>
       <body className="min-h-full font-sans">{children}</body>
     </html>
   );
