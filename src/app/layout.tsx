@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree, Shrikhand } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
-// Retro-Diner-Schrift für Logo, Titel und Restaurant-Namen (gibt es nur in einer Stärke)
-const shrikhand = Shrikhand({ variable: "--font-shrikhand", subsets: ["latin"], weight: "400" });
+// Logo, Titel und Restaurant-Namen: schlicht, mit etwas Charakter
+const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Foodie",
@@ -23,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={`${figtree.variable} ${shrikhand.variable} h-full antialiased`}>
+    <html lang="de" className={`${figtree.variable} ${bricolage.variable} h-full antialiased`}>
       <body className="min-h-full font-sans">{children}</body>
     </html>
   );

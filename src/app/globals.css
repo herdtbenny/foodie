@@ -26,14 +26,12 @@
   --color-german: var(--german);
   --color-evelyne: var(--evelyne);
   --font-sans: var(--font-figtree);
-  --font-display: var(--font-shrikhand);
+  --font-display: var(--font-bricolage);
 }
 
-/* Shrikhand gibt es nur in einer Stärke – kein künstliches Fettdrucken */
+/* Überschriften: etwas enger gesetzt */
 .font-display {
-  font-weight: 400;
-  font-synthesis: none;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
 }
 
 /* Nie seitlich scrollen – `clip` statt `hidden`, damit fixed/sticky weiter funktioniert */
@@ -126,8 +124,8 @@ body {
   min-width: 140px;
 }
 .foodie-popup strong {
-  font-family: var(--font-shrikhand), serif;
-  font-weight: 400;
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 700;
   font-size: 17px;
 }
 .foodie-popup span {
