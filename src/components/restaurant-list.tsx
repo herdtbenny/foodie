@@ -121,16 +121,6 @@ export function RestaurantList({
         )}
 
         {/* Natives <select> liegt unsichtbar über dem Button: öffnet auf dem iPhone das System-Menü */}
-        <MenuButton label="Sortieren" icon={ArrowUpDown} active={sort !== sorts[0].key}>
-          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sortieren" className={nativeSelect}>
-            {sorts.map((s) => (
-              <option key={s.key} value={s.key}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </MenuButton>
-
         {(kinds.length > 0 || cuisines.length > 0 || orderedCount > 0) && (
           <MenuButton label="Filtern" icon={ListFilter} active={!!filter}>
             <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtern" className={nativeSelect}>
@@ -162,6 +152,16 @@ export function RestaurantList({
             </select>
           </MenuButton>
         )}
+
+        <MenuButton label="Sortieren" icon={ArrowUpDown} active={sort !== sorts[0].key}>
+          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sortieren" className={nativeSelect}>
+            {sorts.map((s) => (
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </MenuButton>
       </div>
 
       {(filter || sort !== sorts[0].key) && (
