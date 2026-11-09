@@ -3,7 +3,7 @@
 import { Check, LoaderCircle, Minus, Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { addCategory, deleteCategory, renameCategory, setCategoryWeight } from "@/lib/actions";
+import { addCategory, deleteCategory, renameCategory, setCategoryOnSiteOnly, setCategoryWeight } from "@/lib/actions";
 import type { Category } from "@/lib/restaurants";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 
@@ -34,6 +34,15 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
     if (weight < 0 || weight - cat.weight > left) return;
     setList((current) => current.map((c) => (c.id === cat.id ? { ...c, weight } : c)));
     run(() => setCategoryWeight(cat.id, weight), `${cat.name}: ${weight} %`);
+  }
+
+  function toggleOnSite(cat: Category) {
+    const next = !cat.onSiteOnly;
+    setList((current) => current.map((c) => (c.id === cat.id ? { ...c, onSiteOnly: next } : c)));
+    run(
+      () => setCategoryOnSiteOnly(cat.id, next),
+      next ? `${cat.name}: nur vor Ort` : `${cat.name}: zählt auch bei Bestellung`,
+    );
   }
 
   function rename(cat: Category, name: string) {
@@ -132,6 +141,27 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
               </button>
             </div>
             {cat.weight === 0 && <p className="text-center text-xs text-muted">Zählt nicht zur Gesamtnote.</p>}
+            <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
+              <span className="text-muted">Nur vor Ort (bei Bestellung ausgegraut)</span>
+              <input
+                type="checkbox"
+                checked={cat.onSiteOnly}
+                onChange={() => toggleOnSite(cat)}
+                className="peer sr-only"
+              />
+              <span
+                aria-hidden
+                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-ink ${
+                  cat.onSiteOnly ? "bg-ink" : "bg-line"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 size-5 rounded-full bg-paper shadow transition-[left] ${
+                    cat.onSiteOnly ? "left-6" : "left-1"
+                  }`}
+                />
+              </span>
+            </label>
           </li>
         ))}
       </ul>

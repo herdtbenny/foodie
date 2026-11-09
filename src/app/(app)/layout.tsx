@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { BottomNav } from "@/components/bottom-nav";
 import { Toaster } from "@/components/toaster";
+import { Wordmark } from "@/components/wordmark";
 import { switchPerson } from "@/lib/actions";
 import { requirePerson } from "@/lib/auth";
 import { avatarUrls } from "@/lib/avatars";
@@ -14,10 +15,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-3xl flex-col">
       <header className="flex items-center justify-between gap-3 px-2 pt-[max(env(safe-area-inset-top),1rem)] pb-3 sm:px-4">
-        <Link href="/" className="flex min-w-0 items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="" className="h-10 w-auto shrink-0" />
-          <span className="font-display text-3xl leading-tight font-semibold tracking-tight">Foodie</span>
+        <Link href="/" aria-label="foodie – Startseite" className="min-w-0">
+          <Wordmark className="text-4xl" />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
         <Link

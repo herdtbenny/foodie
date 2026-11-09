@@ -7,7 +7,7 @@ export type Scores = Partial<Record<Person, number>>;
 export type Status = "wunsch" | "besucht";
 export type Review = { recommend: boolean; dish: string | null; photoUrl: string | null };
 export type Reviews = Partial<Record<Person, Review>>;
-export type Category = { id: number; name: string; weight: number; position: number };
+export type Category = { id: number; name: string; weight: number; position: number; onSiteOnly: boolean };
 /** categoryId → Person → Note */
 export type CategoryRatings = Record<number, Scores>;
 
@@ -21,6 +21,8 @@ export type RestaurantSummary = {
   lat: number | null;
   lng: number | null;
   status: Status;
+  /** Bestellt statt vor Ort */
+  ordered: boolean;
   visitedOn: string | null;
   createdBy: string;
   createdAt: string;
@@ -34,7 +36,7 @@ export type RestaurantSummary = {
 };
 
 /** Reihenfolge, in der die Arten angezeigt werden */
-export const KINDS = ["Frühstück", "Café", "Mittagessen", "Abendessen", "Bar", "Bestellung"];
+export const KINDS = ["Frühstück", "Café", "Mittagessen", "Abendessen", "Bar"];
 
 export function toStatus(value: unknown): Status {
   return value === "besucht" ? "besucht" : "wunsch";
@@ -47,6 +49,11 @@ export function average(values: number[]) {
 /** Durchschnitt der vorhandenen Noten, oder null */
 export function averageScore(scores: Scores) {
   return average(Object.values(scores));
+}
+
+/** Kategorien, die für dieses Restaurant zählen (bei Bestellung ohne "nur vor Ort") */
+export function activeCategories(cats: Category[], ordered: boolean) {
+  return ordered ? cats.filter((c) => !c.onSiteOnly) : cats;
 }
 
 /**
@@ -65,7 +72,8 @@ export function personOverall(ratingsByCategory: CategoryRatings, cats: Category
   return weights ? sum / weights : null;
 }
 
-export function overallScores(ratingsByCategory: CategoryRatings, cats: Category[]) {
+export function overallScores(ratingsByCategory: CategoryRatings, allCats: Category[], ordered = false) {
+  const cats = activeCategories(allCats, ordered);
   const scores: Scores = {};
   for (const person of PERSON_IDS) {
     const value = personOverall(ratingsByCategory, cats, person);
@@ -87,7 +95,13 @@ export function weightPercent(cats: Category[], cat: Category) {
 
 export async function listCategories(): Promise<Category[]> {
   return getDb()
-    .select({ id: categories.id, name: categories.name, weight: categories.weight, position: categories.position })
+    .select({
+      id: categories.id,
+      name: categories.name,
+      weight: categories.weight,
+      position: categories.position,
+      onSiteOnly: categories.onSiteOnly,
+    })
     .from(categories)
     .orderBy(asc(categories.position), asc(categories.id));
 }
@@ -147,11 +161,12 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
         lat: r.lat,
         lng: r.lng,
         status: toStatus(r.status),
+        ordered: r.ordered,
         visitedOn: r.visitedOn,
         createdBy: r.createdBy,
         createdAt: r.createdAt.toISOString(),
         ratings: byCategory,
-        ...overallScores(byCategory, cats),
+        ...overallScores(byCategory, cats, r.ordered),
         recommendedBy: PERSON_IDS.filter((p) => reviewMap.get(r.id)?.[p]?.recommend),
       };
     }),
@@ -176,7 +191,7 @@ export async function getRestaurant(id: number) {
     ratings: byCategory,
     categories: cats,
     reviews: groupReviews(reviewRows).get(id) ?? {},
-    ...overallScores(byCategory, cats),
+    ...overallScores(byCategory, cats, row.ordered),
   };
 }
 

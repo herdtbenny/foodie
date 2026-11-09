@@ -3,17 +3,15 @@ import { ImageResponse } from "next/og";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-/** Home-Bildschirm-Icon: Pin mit Besteck */
+/** Home-Bildschirm-Icon: schwarzes "f" mit rotem Punkt auf Creme */
 export default function AppleIcon() {
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: "#1d1b18" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#f6f1e7" }}>
         <svg width="180" height="180" viewBox="0 0 64 64">
-          <path d="M32 12c-8.3 0-15 6.5-15 14.6C17 37.5 32 52 32 52s15-14.5 15-25.4C47 18.5 40.3 12 32 12z" fill="#d7392b" />
-          <path
-            d="M28 19v7.5a2.5 2.5 0 0 0 2 2.45V38h2V28.95a2.5 2.5 0 0 0 2-2.45V19h-1.5v6.5h-1V19h-1.5v6.5h-1V19z M37 19c-1.7 0-2.5 3-2.5 6v3H37v10h2V19z"
-            fill="#f6f1e7"
-          />
+          <path d="M21 52V24a12 12 0 0 1 12-12h7v9h-7a3 3 0 0 0-3 3v28z" fill="#1d1b18" />
+          <rect x="14" y="27" width="24" height="8" fill="#1d1b18" />
+          <circle cx="45" cy="47" r="6" fill="#d7392b" />
         </svg>
       </div>
     ),

@@ -114,6 +114,7 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
     lat,
     lng,
     status,
+    ordered: status === "besucht" && formData.get("ordered") === "1",
     visitedOn: status === "besucht" ? optionalDate(formData, "visitedOn") : null,
     notes: optionalText(formData, "notes"),
   };
@@ -308,6 +309,20 @@ export async function setCategoryWeight(id: number, weight: number) {
   const rest = others.filter((c) => c.id !== id).reduce((sum, c) => sum + c.weight, 0);
   if (rest + weight > 100) throw new Error("Mehr als 100 %");
   await db.update(categories).set({ weight }).where(eq(categories.id, id));
+  refresh();
+}
+
+/** Kategorie nur vor Ort bewertbar (bei Bestellung ausgegraut) */
+export async function setCategoryOnSiteOnly(id: number, onSiteOnly: boolean) {
+  await requirePerson();
+  await getDb().update(categories).set({ onSiteOnly }).where(eq(categories.id, id));
+  refresh();
+}
+
+/** Vor Ort gegessen oder bestellt */
+export async function setOrdered(restaurantId: number, ordered: boolean) {
+  await requirePerson();
+  await getDb().update(restaurants).set({ ordered }).where(eq(restaurants.id, restaurantId));
   refresh();
 }
 

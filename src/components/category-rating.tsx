@@ -18,6 +18,7 @@ export function CategoryRating({
   person,
   own,
   others,
+  disabled = false,
 }: {
   restaurantId: number;
   categoryId: number;
@@ -26,6 +27,8 @@ export function CategoryRating({
   person: Person;
   own?: number;
   others: { person: Person; score?: number }[];
+  /** Ausgegraut, z. B. Ambiente bei Bestellung */
+  disabled?: boolean;
 }) {
   const [value, setValue] = useState<number | undefined>(own);
   const [pending, startTransition] = useTransition();
@@ -47,10 +50,10 @@ export function CategoryRating({
   }
 
   return (
-    <div className="space-y-2.5">
+    <div className={`space-y-2.5 ${disabled ? "opacity-35" : ""}`} aria-disabled={disabled}>
       <div className="flex items-baseline gap-2">
         <h3 className="font-display text-xl font-semibold">{name}</h3>
-        <span className="text-xs text-muted tabular-nums">{percent} %</span>
+        <span className="text-xs text-muted tabular-nums">{disabled ? "zählt nicht (bestellt)" : `${percent} %`}</span>
         {pending && <LoaderCircle className="size-3.5 animate-spin self-center text-muted" />}
         <div className="ml-auto flex gap-1.5">
           {others.map((o) => (
@@ -74,8 +77,9 @@ export function CategoryRating({
               role="radio"
               aria-checked={selected}
               aria-label={`${n} von 10`}
+              disabled={disabled}
               onClick={() => choose(n)}
-              className={`flex aspect-square items-center justify-center rounded-full text-xs font-semibold tabular-nums transition-colors sm:text-sm ${
+              className={`flex aspect-square items-center justify-center rounded-full text-xs font-semibold tabular-nums transition-colors disabled:cursor-not-allowed sm:text-sm ${
                 selected
                   ? `${me.bg} text-white`
                   : below

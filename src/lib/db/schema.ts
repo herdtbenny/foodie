@@ -14,6 +14,8 @@ export const restaurants = pgTable("restaurants", {
   lng: doublePrecision("lng"),
   /** "wunsch" = wollen wir mal hin, "besucht" = waren wir schon */
   status: text("status").notNull().default("wunsch"),
+  /** Bestellt statt vor Ort gegessen – Kategorien "nur vor Ort" (z. B. Ambiente) zählen dann nicht */
+  ordered: boolean("ordered").notNull().default(false),
   visitedOn: date("visited_on", { mode: "string" }),
   /** Gemeinsame Notizen */
   notes: text("notes"),
@@ -28,6 +30,8 @@ export const categories = pgTable("categories", {
   /** Anteil an der Gesamtnote in Prozent (5er-Schritte, alle zusammen 100); 0 = zählt nicht */
   weight: integer("weight").notNull().default(0),
   position: integer("position").notNull().default(0),
+  /** Nur bewertbar, wenn man vor Ort war (z. B. Ambiente) */
+  onSiteOnly: boolean("on_site_only").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

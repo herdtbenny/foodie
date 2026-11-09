@@ -60,6 +60,7 @@ export function RestaurantForm({
   const [name, setName] = useState(restaurant?.name ?? "");
   const [address, setAddress] = useState(restaurant?.address ?? "");
   const [kind, setKind] = useState(restaurant?.kind ?? "");
+  const [ordered, setOrderedState] = useState(false);
   const [status, setStatus] = useState<Status>(restaurant?.status ?? defaultStatus);
   const [coords, setCoords] = useState<Coords>(
     restaurant?.lat != null && restaurant.lng != null ? { lat: restaurant.lat, lng: restaurant.lng } : null,
@@ -136,6 +137,7 @@ export function RestaurantForm({
       <input type="hidden" name="lng" value={coords?.lng ?? ""} />
       <input type="hidden" name="status" value={status} />
       <input type="hidden" name="kind" value={kind} />
+      <input type="hidden" name="ordered" value={ordered ? "1" : ""} />
 
       {/* Google-Maps-Link zuerst – füllt den Rest aus */}
       <div className="space-y-2 rounded-3xl border border-line bg-surface p-4">
@@ -286,6 +288,29 @@ export function RestaurantForm({
           ))}
         </div>
       </fieldset>
+
+      {status === "besucht" && (
+        <div className="grid grid-cols-2 gap-1 rounded-full border border-line bg-surface p-1">
+          {(
+            [
+              [false, "Vor Ort"],
+              [true, "Bestellt"],
+            ] as const
+          ).map(([option, label]) => (
+            <button
+              key={label}
+              type="button"
+              aria-pressed={ordered === option}
+              onClick={() => setOrderedState(option)}
+              className={`rounded-full px-3 py-2.5 text-sm font-medium transition-colors ${
+                ordered === option ? "bg-ink text-paper" : "text-muted"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {status === "besucht" && (
         <Field label="Zuletzt besucht" hint="optional">

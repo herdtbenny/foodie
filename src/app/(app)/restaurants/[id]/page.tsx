@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { DeleteButton } from "@/components/delete-button";
 import { NotesForm } from "@/components/notes-form";
+import { OrderedSwitch } from "@/components/ordered-switch";
 import { EditableTitle, RestaurantInfo } from "@/components/restaurant-info";
 import { PersonReview } from "@/components/person-review";
 import { VisitedDate } from "@/components/visited-date";
@@ -14,7 +15,7 @@ import { StatusToggle } from "@/components/status-toggle";
 import { requirePerson } from "@/lib/auth";
 import { avatarUrls } from "@/lib/avatars";
 import { PEOPLE, PERSON_IDS } from "@/lib/people";
-import { getRestaurant, listRestaurants, valuesOf, weightPercent } from "@/lib/restaurants";
+import { activeCategories, getRestaurant, listRestaurants, valuesOf, weightPercent } from "@/lib/restaurants";
 
 export async function generateMetadata({ params }: PageProps<"/restaurants/[id]">) {
   const { id } = await params;
@@ -62,7 +63,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
           {hasCoords && (
             <RestaurantMap
               interactive={false}
-              zoom={16}
+              zoom={14}
               className="h-44"
               points={[
                 {
@@ -98,6 +99,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
           <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn}>
             <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
           </VisitedDate>
+          <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />
 
           {/* Gesamtnote */}
           <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
@@ -131,7 +133,8 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
                 restaurantId={restaurant.id}
                 categoryId={cat.id}
                 name={cat.name}
-                percent={weightPercent(restaurant.categories, cat)}
+                percent={weightPercent(activeCategories(restaurant.categories, restaurant.ordered), cat)}
+                disabled={restaurant.ordered && cat.onSiteOnly}
                 person={person}
                 own={restaurant.ratings[cat.id]?.[person]}
                 others={PERSON_IDS.filter((p) => p !== person).map((p) => ({
