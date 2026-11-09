@@ -2,8 +2,9 @@
 
 import { ChevronDown, ExternalLink, LoaderCircle, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Children, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { updateRestaurant, type RestaurantPatch } from "@/lib/actions";
+import { PRICE_LEVELS } from "@/lib/price";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 
 function useSave(id: number) {
@@ -141,7 +142,64 @@ export function SelectChip({
   );
 }
 
-/** Chip-Zeile unter der Karte: Küche, dahinter weitere Chips (Datum, Vor Ort/Bestellt) */
+/** Preis-Chip (€ bis €€€) mit nativem Menü darüber */
+export function PriceSelect({
+  value,
+  onChange,
+  pending,
+}: {
+  value: number | null;
+  onChange: (value: number | null) => void;
+  pending?: boolean;
+}) {
+  const current = PRICE_LEVELS.find((p) => p.value === value);
+  return (
+    <span
+      className={`press glass relative flex w-full min-w-0 items-center justify-center gap-1 rounded-full py-3.5 pr-2.5 pl-3 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
+        current ? "text-ink" : "text-muted"
+      }`}
+    >
+      <span className="min-w-0 truncate tracking-tight">{current ? current.label : "Preis"}</span>
+      {pending ? (
+        <LoaderCircle className="size-3.5 shrink-0 animate-spin opacity-60" />
+      ) : (
+        <ChevronDown className="size-3.5 shrink-0 opacity-60" />
+      )}
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
+        aria-label="Preis"
+        className="absolute inset-0 size-full cursor-pointer appearance-none rounded-full opacity-0"
+      >
+        <option value="">Kein Preis</option>
+        {PRICE_LEVELS.map((p) => (
+          <option key={p.value} value={p.value}>
+            {p.label} · {p.hint}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
+/** Preis direkt auf der Detailseite ändern */
+export function PriceChip({ id, priceLevel }: { id: number; priceLevel: number | null }) {
+  const { pending, save } = useSave(id);
+  const [current, setCurrent] = useState(priceLevel);
+  return (
+    <PriceSelect
+      value={current}
+      pending={pending}
+      onChange={(v) => {
+        setCurrent(v);
+        const level = PRICE_LEVELS.find((p) => p.value === v);
+        save({ priceLevel: v }, level ? `Preis: ${level.label}` : "Preis entfernt", () => setCurrent(priceLevel));
+      }}
+    />
+  );
+}
+
+/** Chips unter der Karte im 2er-Raster: Küche, dahinter weitere Chips (Preis, Datum, Vor Ort/Bestellt) */
 export function MetaChips({
   id,
   cuisine,
@@ -155,11 +213,10 @@ export function MetaChips({
 }) {
   const { pending, save } = useSave(id);
   const [current, setCurrent] = useState(cuisine ?? "");
-  // Gleich breite Spalten über die ganze Zeile
-  const columns = 1 + Children.toArray(children).length;
 
+  // 2×2-Raster: Küche, Preis / Datum, Vor Ort
   return (
-    <div className="grid items-center gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+    <div className="grid grid-cols-2 items-center gap-1.5">
       <SelectChip
         label="Küche"
         value={current}

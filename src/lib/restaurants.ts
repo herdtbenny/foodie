@@ -22,6 +22,8 @@ export type RestaurantSummary = {
   /** Bestellt statt vor Ort */
   ordered: boolean;
   visitedOn: string | null;
+  /** 1–3 (€ bis €€€) */
+  priceLevel: number | null;
   createdBy: string;
   createdAt: string;
   ratings: CategoryRatings;
@@ -151,6 +153,7 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
         status: toStatus(r.status),
         ordered: r.ordered,
         visitedOn: r.visitedOn,
+        priceLevel: r.priceLevel,
         createdBy: r.createdBy,
         createdAt: r.createdAt.toISOString(),
         ratings: byCategory,

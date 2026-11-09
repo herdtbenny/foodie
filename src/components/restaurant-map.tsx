@@ -5,6 +5,7 @@ import type { Map as LeafletMap } from "leaflet";
 import { useRouter } from "next/navigation";
 import { createElement, useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { scoreColor } from "@/lib/score-color";
 import { cuisineIcon } from "./cuisine-icon";
 
 export type MapPoint = {
@@ -23,11 +24,7 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-/** Gesamtnote → Farbe: 1 = Rot, 10 = Grün (ein Farbton pro Pin, kein Verlauf) */
-export function scoreColor(score: number) {
-  const t = Math.min(Math.max((score - 1) / 9, 0), 1);
-  return `hsl(${Math.round(t * 125)} 62% 42%)`;
-}
+export { scoreColor };
 
 /** Pin: Küchen-Icon im Kreis. Besucht = nach Note gefärbt, Wunschliste = hell mit Rand. */
 function pinHtml(point: MapPoint) {
@@ -46,22 +43,28 @@ export function RestaurantMap({
   className,
   interactive = true,
   zoom = 15,
+  fitPadding,
 }: {
   points: MapPoint[];
   className?: string;
   /** false = kleine Vorschau auf der Detailseite */
   interactive?: boolean;
   zoom?: number;
+  /** Abstand beim Einpassen (oben/unten in px), z. B. für überlagerte Leisten im Vollbild */
+  fitPadding?: { top: number; bottom: number };
 }) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<LeafletMap | null>(null);
   const router = useRouter();
   // Punkte als Schlüssel, damit die Karte nur bei echten Änderungen neu gebaut wird
   const key = JSON.stringify(points);
+  const padTop = fitPadding?.top;
+  const padBottom = fitPadding?.bottom;
 
   useEffect(() => {
     let cancelled = false;
     const list = JSON.parse(key) as MapPoint[];
+    const fitPadding = padTop != null && padBottom != null ? { top: padTop, bottom: padBottom } : null;
 
     (async () => {
       const L = (await import("leaflet")).default;
@@ -112,7 +115,16 @@ export function RestaurantMap({
       } else if (list.length === 1) {
         instance.setView([list[0].lat, list[0].lng], zoom);
       } else {
-        instance.fitBounds(L.featureGroup(markers).getBounds(), { padding: [40, 40], maxZoom: 15 });
+        const bounds = L.featureGroup(markers).getBounds();
+        if (fitPadding) {
+          instance.fitBounds(bounds, {
+            paddingTopLeft: [40, fitPadding.top],
+            paddingBottomRight: [40, fitPadding.bottom],
+            maxZoom: 15,
+          });
+        } else {
+          instance.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+        }
       }
     })();
 
@@ -121,7 +133,7 @@ export function RestaurantMap({
       map.current?.remove();
       map.current = null;
     };
-  }, [key, interactive, zoom, router]);
+  }, [key, interactive, zoom, router, padTop, padBottom]);
 
   return <div ref={container} className={`isolate z-0 overflow-hidden bg-line ${className ?? ""}`} />;
 }

@@ -7,7 +7,7 @@ import { lookupMapsLink, saveRestaurant } from "@/lib/actions";
 import { todayBerlin } from "@/lib/format-date";
 import type { Status } from "@/lib/restaurants";
 import { SAVE_FAILED, toast } from "@/lib/toast";
-import { SelectChip } from "./restaurant-info";
+import { PriceSelect, SelectChip } from "./restaurant-info";
 import { RestaurantMap } from "./restaurant-map";
 import { Segmented } from "./segmented";
 
@@ -26,6 +26,7 @@ export function RestaurantForm({ cuisines, defaultStatus = "wunsch" }: { cuisine
   const [mapsUrl, setMapsUrl] = useState("");
   const [name, setName] = useState("");
   const [cuisine, setCuisine] = useState("");
+  const [priceLevel, setPriceLevel] = useState<number | null>(null);
   const [status, setStatus] = useState<Status>(defaultStatus);
   const [coords, setCoords] = useState<Coords>(null);
   const [linkState, setLinkState] = useState<LinkState>("idle");
@@ -94,6 +95,7 @@ export function RestaurantForm({ cuisines, defaultStatus = "wunsch" }: { cuisine
       <input type="hidden" name="lng" value={coords?.lng ?? ""} />
       <input type="hidden" name="status" value={status} />
       <input type="hidden" name="cuisine" value={cuisine} />
+      <input type="hidden" name="priceLevel" value={priceLevel ?? ""} />
       {status === "besucht" && <input type="hidden" name="visitedOn" value={todayBerlin()} />}
 
       {/* Google-Maps-Link mit Vorschau */}
@@ -153,7 +155,10 @@ export function RestaurantForm({ cuisines, defaultStatus = "wunsch" }: { cuisine
         className="glass w-full rounded-full px-5 py-3 font-display text-lg font-semibold outline-none placeholder:font-sans placeholder:text-base placeholder:font-normal placeholder:text-muted/70"
       />
 
-      <SelectChip label="Küche" value={cuisine} options={cuisines} allowNew onChange={setCuisine} />
+      <div className="grid grid-cols-[2fr_1fr] gap-1.5">
+        <SelectChip label="Küche" value={cuisine} options={cuisines} allowNew onChange={setCuisine} />
+        <PriceSelect value={priceLevel} onChange={setPriceLevel} />
+      </div>
 
       <Segmented
         label="Status"

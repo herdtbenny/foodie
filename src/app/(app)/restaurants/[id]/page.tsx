@@ -5,7 +5,7 @@ import { Avatar } from "@/components/avatar";
 import { DeleteButton } from "@/components/delete-button";
 import { NotesForm } from "@/components/notes-form";
 import { OrderedSwitch } from "@/components/ordered-switch";
-import { EditableTitle, MapsLinkRow, MetaChips } from "@/components/restaurant-info";
+import { EditableTitle, MapsLinkRow, MetaChips, PriceChip } from "@/components/restaurant-info";
 import { PersonReview } from "@/components/person-review";
 import { VisitedDate } from "@/components/visited-date";
 import { CategoryRating } from "@/components/category-rating";
@@ -13,6 +13,7 @@ import { RestaurantMap } from "@/components/restaurant-map";
 import { formatScore } from "@/components/score";
 import { StatusToggle } from "@/components/status-toggle";
 import { requirePerson } from "@/lib/auth";
+import { scoreColor } from "@/lib/score-color";
 import { avatarUrls } from "@/lib/avatars";
 import { PEOPLE, PERSON_IDS } from "@/lib/people";
 import { activeCategories, cuisinesOf, getRestaurant, listRestaurants, weightPercent } from "@/lib/restaurants";
@@ -34,16 +35,20 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   const hasCoords = restaurant.lat != null && restaurant.lng != null;
 
   return (
-    <article className="space-y-5">
-      <Link href={visited ? "/" : "/wunschliste"} className="inline-flex items-center gap-1.5 px-2 text-sm text-muted">
-        <ArrowLeft className="size-4" />
-        {visited ? "Bisherige" : "Wunschliste"}
-      </Link>
-
-      <header className="-mt-1 space-y-2 px-2">
-        {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
+    <article className="space-y-4">
+      {/* Zurück als Icon links neben dem Namen */}
+      <header className="flex items-start gap-1.5 pr-2">
+        <Link
+          href={visited ? "/" : "/wunschliste"}
+          aria-label={visited ? "Zurück zu Bisherige" : "Zurück zur Wunschliste"}
+          className="press glass mt-1 flex size-10 shrink-0 items-center justify-center rounded-full text-ink"
+        >
+          <ArrowLeft className="size-5" />
+        </Link>
         <h1 className="sr-only">{restaurant.name}</h1>
-        <EditableTitle id={restaurant.id} name={restaurant.name} />
+        <div className="min-w-0 flex-1">
+          <EditableTitle id={restaurant.id} name={restaurant.name} />
+        </div>
       </header>
 
       {/* Karte, darunter schmale Zeile mit dem Google-Maps-Link */}
@@ -70,19 +75,14 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         <MapsLinkRow id={restaurant.id} mapsUrl={restaurant.mapsUrl} />
       </div>
 
-      {/* Chips unter der Karte: Küche, bei Bisherigen auch Datum und Vor Ort/Bestellt */}
+      {/* Chips unter der Karte: Küche, Preis, bei Bisherigen auch Datum und Vor Ort/Bestellt */}
       <MetaChips id={restaurant.id} cuisine={restaurant.cuisine} cuisines={cuisinesOf(all)}>
+        <PriceChip id={restaurant.id} priceLevel={restaurant.priceLevel} />
         {visited && <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />}
         {visited && <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />}
       </MetaChips>
 
-      {visited ? (
-        <section className="space-y-3">
-
-        </section>
-      ) : (
-        <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
-      )}
+      {!visited && <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />}
 
       {visited && (
         <section className="space-y-3">
@@ -92,7 +92,14 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
             {/* Kopf: Gesamtnote + eure beiden Noten in einer Zeile */}
             <div className="flex items-center gap-3 px-3 py-2.5">
               <span className="text-sm font-medium text-muted">Gesamt</span>
-              <div className="-ml-1 flex size-12 shrink-0 items-center justify-center rounded-full bg-pop font-display text-xl leading-none font-semibold text-white tabular-nums shadow-[inset_0_1px_0_rgb(255_255_255/0.35)]">
+              <div
+                className={`-ml-1 flex size-12 shrink-0 items-center justify-center rounded-full font-display text-xl leading-none font-semibold tabular-nums ${
+                  average !== null
+                    ? "text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35)]"
+                    : "border border-line text-muted"
+                }`}
+                style={average !== null ? { background: scoreColor(average) } : undefined}
+              >
                 {average !== null ? formatScore(average) : "–"}
               </div>
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1">
@@ -108,7 +115,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               </div>
             </div>
 
-            <div className="space-y-3.5 px-3 py-3">
+            <div className="space-y-2 px-3 py-3">
               {restaurant.categories.length === 0 && (
                 <p className="text-sm text-muted">Noch keine Kategorien angelegt.</p>
               )}

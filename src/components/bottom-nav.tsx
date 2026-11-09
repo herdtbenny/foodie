@@ -36,21 +36,23 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-label="Neues Restaurant"
-              className="press glass-ink relative z-10 mx-0.5 flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-1 py-1.5 text-[11px] font-semibold"
+              title={label}
+              className="press glass-ink relative z-10 mx-0.5 flex min-w-0 flex-1 items-center justify-center rounded-full px-1 py-3"
             >
-              <Icon className="size-5" strokeWidth={2.5} />
-              {label}
+              <Icon className="size-6" strokeWidth={2.5} />
             </Link>
           ) : (
             <Link
               key={href}
               href={href}
-              className={`press relative z-10 flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-1 py-1.5 text-[11px] font-medium whitespace-nowrap ${
+              aria-label={label}
+              aria-current={i === activeIndex ? "page" : undefined}
+              title={label}
+              className={`press relative z-10 flex min-w-0 flex-1 items-center justify-center rounded-full px-1 py-3 ${
                 i === activeIndex ? "text-pop" : "text-muted"
               }`}
             >
-              <Icon className="size-5" />
-              {label}
+              <Icon className="size-6" />
             </Link>
           ),
         )}

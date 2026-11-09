@@ -1,6 +1,8 @@
 import { CalendarDays, MapPin } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
+import { formatPrice } from "@/lib/price";
+import { scoreColor } from "@/lib/score-color";
 import type { RestaurantSummary } from "@/lib/restaurants";
 import { CuisineIcon } from "./cuisine-icon";
 import { formatScore, ScorePills } from "./score";
@@ -10,6 +12,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
   const visited = restaurant.status === "besucht";
   const average = restaurant.overall;
   const tags = restaurant.cuisine ?? "";
+  const price = formatPrice(restaurant.priceLevel);
 
   return (
     <div className="relative flex min-w-0 items-center gap-3 card rounded-3xl p-2 pr-3">
@@ -29,6 +32,12 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
         </Link>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
           {tags && <span className="truncate text-[11px] font-semibold tracking-wider uppercase">{tags}</span>}
+          {tags && price && <span aria-hidden>·</span>}
+          {price && (
+            <span className="shrink-0 text-[11px] font-semibold text-ink/70" aria-label={`Preis ${price}`}>
+              {price}
+            </span>
+          )}
           {!tags && restaurant.lat === null && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3" />
@@ -49,7 +58,10 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span
               title="Gesamtnote"
-              className="min-w-11 rounded-full bg-pop px-2.5 py-1 text-center font-display text-lg leading-none font-semibold text-white tabular-nums"
+              className={`min-w-11 rounded-full px-2.5 py-1 text-center font-display text-lg leading-none font-semibold tabular-nums ${
+                average !== null ? "text-white" : "border border-line text-muted"
+              }`}
+              style={average !== null ? { background: scoreColor(average) } : undefined}
             >
               {average !== null ? formatScore(average) : "–"}
             </span>

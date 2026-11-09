@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpDown, ListFilter, Search, X } from "lucide-react";
+import { formatPrice, PRICE_LEVELS } from "@/lib/price";
 import { useMemo, useState } from "react";
 import { categoryAverage, type Category, type RestaurantSummary, type Status } from "@/lib/restaurants";
 import { RestaurantCard } from "./restaurant-card";
@@ -76,12 +77,17 @@ export function RestaurantList({
 
   const [filterType, filterValue] = filter ? [filter.slice(0, filter.indexOf(":")), filter.slice(filter.indexOf(":") + 1)] : ["", ""];
   const orderedCount = restaurants.filter((r) => r.ordered).length;
+  const prices = PRICE_LEVELS.map((p) => ({ ...p, count: restaurants.filter((r) => r.priceLevel === p.value).length })).filter(
+    (p) => p.count > 0,
+  );
   const needle = q.trim().toLowerCase();
   const shown = restaurants
     .filter((r) => !needle || `${r.name}\n${r.cuisine ?? ""}`.toLowerCase().includes(needle))
     .filter((r) =>
       filterType === "kueche"
           ? r.cuisine === filterValue
+          : filterType === "preis"
+            ? formatPrice(r.priceLevel) === filterValue
           : filterType === "ort"
             ? r.ordered === (filterValue === "Bestellt")
             : true,
@@ -112,7 +118,7 @@ export function RestaurantList({
         )}
 
         {/* Natives <select> liegt unsichtbar über dem Button: öffnet auf dem iPhone das System-Menü */}
-        {(cuisines.length > 0 || orderedCount > 0) && (
+        {(cuisines.length > 0 || orderedCount > 0 || prices.length > 0) && (
           <MenuButton label="Filtern" icon={ListFilter} active={!!filter}>
             <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtern" className={nativeSelect}>
               <option value="">Alle anzeigen ({restaurants.length})</option>
@@ -120,6 +126,15 @@ export function RestaurantList({
                 <optgroup label="Wie">
                   <option value="ort:Vor Ort">Vor Ort ({restaurants.length - orderedCount})</option>
                   <option value="ort:Bestellt">Bestellt ({orderedCount})</option>
+                </optgroup>
+              )}
+              {prices.length > 0 && (
+                <optgroup label="Preis">
+                  {prices.map((p) => (
+                    <option key={p.value} value={`preis:${p.label}`}>
+                      {p.label} · {p.hint} ({p.count})
+                    </option>
+                  ))}
                 </optgroup>
               )}
               {cuisines.length > 0 && (

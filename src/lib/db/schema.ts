@@ -15,6 +15,8 @@ export const restaurants = pgTable("restaurants", {
   /** Bestellt statt vor Ort gegessen – Kategorien "nur vor Ort" (z. B. Ambiente) zählen dann nicht */
   ordered: boolean("ordered").notNull().default(false),
   visitedOn: date("visited_on", { mode: "string" }),
+  /** Preisniveau 1–3 (€ bis €€€), null = unbekannt */
+  priceLevel: integer("price_level"),
   /** Gemeinsame Notizen */
   notes: text("notes"),
   createdBy: text("created_by").notNull(),

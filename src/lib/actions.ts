@@ -14,6 +14,7 @@ import { lookupMaps, type MapsInfo } from "./maps";
 import { pushToPerson } from "./push";
 import { isPerson } from "./people";
 import { AUTH_COOKIE, PERSON_COOKIE, signAuth, verifyAuth } from "./session";
+import { toPriceLevel } from "./price";
 import { toStatus, type Status } from "./restaurants";
 
 function text(formData: FormData, key: string) {
@@ -116,6 +117,7 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
     ordered: status === "besucht" && formData.get("ordered") === "1",
     visitedOn: status === "besucht" ? optionalDate(formData, "visitedOn") : null,
     notes: optionalText(formData, "notes"),
+    priceLevel: toPriceLevel(optionalNumber(formData, "priceLevel")),
   };
 
   if (id) {
@@ -142,6 +144,7 @@ export type RestaurantPatch = Partial<{
   name: string;
   cuisine: string | null;
   mapsUrl: string | null;
+  priceLevel: number | null;
 }>;
 
 /**
@@ -163,6 +166,7 @@ export async function updateRestaurant(id: number, patch: RestaurantPatch) {
   }
   if ("cuisine" in patch) values.cuisine = clean(patch.cuisine);
   if ("mapsUrl" in patch) values.mapsUrl = clean(patch.mapsUrl);
+  if ("priceLevel" in patch) values.priceLevel = toPriceLevel(patch.priceLevel);
 
   if ("mapsUrl" in patch && values.mapsUrl) {
     const info = await lookupMaps(values.mapsUrl);
