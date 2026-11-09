@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { ArrowUpDown, ListFilter, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { categoryAverage, kindOrder, type Category, type RestaurantSummary, type Status } from "@/lib/restaurants";
 import { RestaurantCard } from "./restaurant-card";
@@ -51,7 +51,6 @@ function counts(values: (string | null)[]) {
   return map;
 }
 
-const chip = "shrink-0 rounded-full border px-3 py-1.5 text-sm whitespace-nowrap transition-colors";
 
 /** Suche, Küche und Sortierung – alles im Browser, die Liste ist klein. */
 export function RestaurantList({
@@ -65,80 +64,115 @@ export function RestaurantList({
 }) {
   const sorts = sortOptions(status, categories);
   const [q, setQ] = useState("");
-  const [kind, setKind] = useState("");
-  const [cuisine, setCuisine] = useState("");
+  /** "" = alle, sonst "art:Café" oder "kueche:Sushi" */
+  const [filter, setFilter] = useState("");
   const [sort, setSort] = useState(sorts[0].key);
   const compare = (sorts.find((s) => s.key === sort) ?? sorts[0]).compare;
 
   const kinds = useMemo(
-    () => [...counts(restaurants.map((r) => r.kind))].sort((a, b) => kindOrder(a[0]) - kindOrder(b[0]) || a[0].localeCompare(b[0], "de")),
+    () =>
+      [...counts(restaurants.map((r) => r.kind))].sort(
+        (a, b) => kindOrder(a[0]) - kindOrder(b[0]) || a[0].localeCompare(b[0], "de"),
+      ),
     [restaurants],
   );
   const cuisines = useMemo(
-    () =>
-      [...counts(restaurants.filter((r) => !kind || r.kind === kind).map((r) => r.cuisine))].sort(
-        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "de"),
-      ),
-    [restaurants, kind],
+    () => [...counts(restaurants.map((r) => r.cuisine))].sort((a, b) => a[0].localeCompare(b[0], "de")),
+    [restaurants],
   );
 
+  const [filterType, filterValue] = filter ? [filter.slice(0, filter.indexOf(":")), filter.slice(filter.indexOf(":") + 1)] : ["", ""];
   const needle = q.trim().toLowerCase();
   const shown = restaurants
     .filter((r) => !needle || `${r.name}\n${r.cuisine ?? ""}\n${r.kind ?? ""}\n${r.address ?? ""}`.toLowerCase().includes(needle))
-    .filter((r) => !kind || r.kind === kind)
-    .filter((r) => !cuisine || r.cuisine === cuisine)
+    .filter((r) => (filterType === "art" ? r.kind === filterValue : filterType === "kueche" ? r.cuisine === filterValue : true))
     .sort(compare);
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <label className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted" />
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Suchen: Name, Küche, Ort …"
-            aria-label="Suchen"
-            className="w-full rounded-full border border-line bg-surface py-2.5 pr-10 pl-10 outline-none placeholder:text-muted/70 focus:border-ink [&::-webkit-search-cancel-button]:hidden"
-          />
-          {q && (
-            <button
-              type="button"
-              onClick={() => setQ("")}
-              aria-label="Suche leeren"
-              className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted"
-            >
-              <X className="size-4" />
-            </button>
-          )}
-        </label>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          aria-label="Sortierung"
-          className="w-36 shrink-0 appearance-none rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink"
-        >
-          {sorts.map((s) => (
-            <option key={s.key} value={s.key}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+      <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 pl-4 focus-within:border-ink">
+        <Search className="size-4 shrink-0 text-muted" />
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Suchen: Name, Küche, Ort …"
+          aria-label="Suchen"
+          className="min-w-0 flex-1 bg-transparent py-1.5 pl-1.5 outline-none placeholder:text-muted/70 [&::-webkit-search-cancel-button]:hidden"
+        />
+        {q && (
+          <button
+            type="button"
+            onClick={() => setQ("")}
+            aria-label="Suche leeren"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+
+        {/* Natives <select> liegt unsichtbar über dem Button: öffnet auf dem iPhone das System-Menü */}
+        <MenuButton label="Sortieren" icon={ArrowUpDown} active={sort !== sorts[0].key}>
+          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sortieren" className={nativeSelect}>
+            {sorts.map((s) => (
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </MenuButton>
+
+        {(kinds.length > 0 || cuisines.length > 0) && (
+          <MenuButton label="Filtern" icon={ListFilter} active={!!filter}>
+            <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtern" className={nativeSelect}>
+              <option value="">Alle anzeigen ({restaurants.length})</option>
+              {kinds.length > 0 && (
+                <optgroup label="Art">
+                  {kinds.map(([name, count]) => (
+                    <option key={name} value={`art:${name}`}>
+                      {name} ({count})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {cuisines.length > 0 && (
+                <optgroup label="Küche">
+                  {cuisines.map(([name, count]) => (
+                    <option key={name} value={`kueche:${name}`}>
+                      {name} ({count})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+          </MenuButton>
+        )}
       </div>
 
-      {kinds.length > 1 && (
-        <ChipRow
-          all={restaurants.length}
-          items={kinds}
-          value={kind}
-          onChange={(v) => {
-            setKind(v);
-            setCuisine("");
-          }}
-        />
+      {(filter || sort !== sorts[0].key) && (
+        <div className="flex flex-wrap gap-1.5">
+          {filter && (
+            <button
+              type="button"
+              onClick={() => setFilter("")}
+              className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm text-paper"
+            >
+              {filterValue}
+              <X className="size-3.5" />
+            </button>
+          )}
+          {sort !== sorts[0].key && (
+            <button
+              type="button"
+              onClick={() => setSort(sorts[0].key)}
+              className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-muted"
+            >
+              {sorts.find((s) => s.key === sort)?.label}
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
       )}
-      {cuisines.length > 1 && <ChipRow small items={cuisines} value={cuisine} onChange={setCuisine} />}
 
       {shown.length ? (
         <ul className="space-y-2">
@@ -155,39 +189,28 @@ export function RestaurantList({
   );
 }
 
-function ChipRow({
-  items,
-  value,
-  onChange,
-  all,
-  small,
+const nativeSelect = "absolute inset-0 size-full cursor-pointer appearance-none rounded-full opacity-0";
+
+function MenuButton({
+  label,
+  icon: Icon,
+  active,
+  children,
 }: {
-  items: [string, number][];
-  value: string;
-  onChange: (value: string) => void;
-  all?: number;
-  small?: boolean;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  active: boolean;
+  children: React.ReactNode;
 }) {
-  const tone = (active: boolean) =>
-    active ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted";
-  const size = small ? "px-2.5 py-1 text-xs" : "";
   return (
-    <div className="no-scrollbar -mx-2 flex gap-1.5 overflow-x-auto px-2 sm:-mx-4 sm:px-4">
-      {all !== undefined && (
-        <button type="button" onClick={() => onChange("")} className={`${chip} ${size} ${tone(!value)}`}>
-          Alle <span className="opacity-60">{all}</span>
-        </button>
-      )}
-      {items.map(([name, count]) => (
-        <button
-          key={name}
-          type="button"
-          onClick={() => onChange(value === name ? "" : name)}
-          className={`${chip} ${size} ${tone(value === name)}`}
-        >
-          {name} <span className="opacity-60">{count}</span>
-        </button>
-      ))}
-    </div>
+    <span
+      title={label}
+      className={`relative flex size-9 shrink-0 items-center justify-center rounded-full transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
+        active ? "bg-ink text-paper" : "text-muted hover:text-ink"
+      }`}
+    >
+      <Icon className="size-[18px]" />
+      {children}
+    </span>
   );
 }
