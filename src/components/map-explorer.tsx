@@ -44,20 +44,26 @@ export function MapExplorer({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          Note
-          {[1, 4, 7, 10].map((n) => (
-            <span
-              key={n}
-              className="flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-              style={{ background: scoreColor(n) }}
-            >
-              {n}
-            </span>
-          ))}
-        </span>
-        <span className="inline-flex items-center gap-1.5">
+      {/* Legende: Notenstrahl 1–10 in den Pinfarben (einzelne Felder, kein Verlauf) */}
+      <div className="flex items-end gap-3 px-2 text-xs text-muted">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex justify-between">
+            <span>Gesamtnote</span>
+            <span>schlecht → top</span>
+          </div>
+          <div className="flex overflow-hidden rounded-full">
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+              <span
+                key={n}
+                className="flex h-6 flex-1 items-center justify-center text-[10px] font-semibold text-white tabular-nums"
+                style={{ background: scoreColor(n) }}
+              >
+                {n}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1.5 pb-1">
           <span className="size-4 rounded-full border-2 border-ink bg-surface" /> Wunschliste
         </span>
       </div>
