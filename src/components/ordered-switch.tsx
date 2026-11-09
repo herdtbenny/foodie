@@ -4,15 +4,15 @@ import { Bike, Store } from "lucide-react";
 import { useState, useTransition } from "react";
 import { setOrdered } from "@/lib/actions";
 import { SAVE_FAILED, toast } from "@/lib/toast";
-import { Segmented } from "./segmented";
 
-/** Vor Ort gegessen oder bestellt – bei "Bestellt" zählen Kategorien wie Ambiente nicht */
+/** Flag-Chip neben dem Datum: Vor Ort ↔ Bestellt. Bei "Bestellt" zählen Kategorien wie Ambiente nicht. */
 export function OrderedSwitch({ restaurantId, ordered }: { restaurantId: number; ordered: boolean }) {
   const [value, setValue] = useState(ordered);
   const [pending, startTransition] = useTransition();
+  const Icon = value ? Bike : Store;
 
-  function choose(next: boolean) {
-    if (next === value) return;
+  function toggle() {
+    const next = !value;
     setValue(next);
     startTransition(async () => {
       try {
@@ -26,15 +26,18 @@ export function OrderedSwitch({ restaurantId, ordered }: { restaurantId: number;
   }
 
   return (
-    <Segmented
-      label="Vor Ort oder bestellt"
-      value={value}
-      onChange={choose}
+    <button
+      type="button"
+      onClick={toggle}
       disabled={pending}
-      options={[
-        { value: false, label: "Vor Ort", icon: Store },
-        { value: true, label: "Bestellt", icon: Bike },
-      ]}
-    />
+      aria-pressed={value}
+      title="Antippen zum Umschalten: Vor Ort / Bestellt"
+      className={`press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium disabled:opacity-70 ${
+        value ? "glass-ink" : "glass text-ink"
+      }`}
+    >
+      <Icon className="size-4" />
+      {value ? "Bestellt" : "Vor Ort"}
+    </button>
   );
 }

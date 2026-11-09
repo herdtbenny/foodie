@@ -98,8 +98,11 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       {visited ? (
         <section className="space-y-3">
-          <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />
-          <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />
+          {/* Datum und Vor Ort/Bestellt als kleine Chips nebeneinander */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />
+            <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />
+          </div>
 
           {/* Gesamtnote */}
           <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
