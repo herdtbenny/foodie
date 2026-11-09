@@ -13,7 +13,7 @@ import { todayBerlin } from "./format-date";
 import { lookupMaps, type MapsInfo } from "./maps";
 import { pushToPerson } from "./push";
 import { isPerson } from "./people";
-import { AUTH_COOKIE, PERSON_COOKIE, signAuth, verifyAuth } from "./session";
+import { AUTH_COOKIE, AUTH_MAX_AGE, PERSON_COOKIE, signAuth, verifyAuth } from "./session";
 import { toPriceLevel } from "./price";
 import { toStatus, type Status } from "./restaurants";
 
@@ -44,7 +44,7 @@ function refresh() {
 
 export type LoginState = { error?: string };
 
-/** Anmeldung: Passwort (nur beim ersten Mal pro Gerät) + „Wer bist du?“ */
+/** Anmeldung: Passwort (alle 30 Tage pro Gerät) + „Wer bist du?“ */
 export async function login(_: LoginState, formData: FormData): Promise<LoginState> {
   const person = formData.get("person");
   if (!isPerson(person)) return { error: "Wer bist du?" };
@@ -61,7 +61,7 @@ export async function login(_: LoginState, formData: FormData): Promise<LoginSta
       secure,
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 365,
+      maxAge: AUTH_MAX_AGE,
     });
   }
 
