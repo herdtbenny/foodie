@@ -3,10 +3,8 @@ import { boolean, date, doublePrecision, integer, pgTable, primaryKey, serial, t
 export const restaurants = pgTable("restaurants", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  /** Küche, z. B. "Italienisch" */
+  /** Küche, z. B. "Italienisch", "Sushi", "Frühstück", "Bar" */
   cuisine: text("cuisine"),
-  /** Art, z. B. "Abendessen", "Frühstück", "Café", "Bar", "Bestellung" */
-  kind: text("kind"),
   address: text("address"),
   mapsUrl: text("maps_url"),
   /** Aus dem Google-Maps-Link gelesen (oder per Adresse gesucht) */

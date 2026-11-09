@@ -9,7 +9,7 @@ import { formatScore, ScorePills } from "./score";
 export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }) {
   const visited = restaurant.status === "besucht";
   const average = restaurant.overall;
-  const tags = [restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ");
+  const tags = restaurant.cuisine ?? "";
 
   return (
     <div className="relative flex min-w-0 items-center gap-3 card rounded-3xl p-2 pr-3">
@@ -17,7 +17,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
       <div
         className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-line text-muted"
       >
-        <CuisineIcon cuisine={restaurant.cuisine} kind={restaurant.kind} name={restaurant.name} className="size-7" />
+        <CuisineIcon cuisine={restaurant.cuisine} name={restaurant.name} className="size-7" />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">

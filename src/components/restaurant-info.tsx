@@ -131,43 +131,21 @@ function SelectChip({
   );
 }
 
-/** Direkt unter dem Namen: je ein Chip für Art und Küche */
-export function MetaChips({
-  id,
-  kind,
-  cuisine,
-  kinds,
-  cuisines,
-}: {
-  id: number;
-  kind: string | null;
-  cuisine: string | null;
-  kinds: string[];
-  cuisines: string[];
-}) {
+/** Direkt unter dem Namen: Chip für die Küche */
+export function MetaChips({ id, cuisine, cuisines }: { id: number; cuisine: string | null; cuisines: string[] }) {
   const { pending, save } = useSave(id);
-  const [currentKind, setCurrentKind] = useState(kind ?? "");
-  const [currentCuisine, setCurrentCuisine] = useState(cuisine ?? "");
+  const [current, setCurrent] = useState(cuisine ?? "");
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <SelectChip
-        label="Art"
-        value={currentKind}
-        options={kinds}
-        onChange={(v) => {
-          setCurrentKind(v);
-          save({ kind: v || null }, v ? `Art: ${v}` : "Art entfernt", () => setCurrentKind(kind ?? ""));
-        }}
-      />
-      <SelectChip
         label="Küche"
-        value={currentCuisine}
+        value={current}
         options={cuisines}
         allowNew
         onChange={(v) => {
-          setCurrentCuisine(v);
-          save({ cuisine: v || null }, v ? `Küche: ${v}` : "Küche entfernt", () => setCurrentCuisine(cuisine ?? ""));
+          setCurrent(v);
+          save({ cuisine: v || null }, v ? `Küche: ${v}` : "Küche entfernt", () => setCurrent(cuisine ?? ""));
         }}
       />
       {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}

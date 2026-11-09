@@ -108,7 +108,6 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
   const values = {
     name,
     cuisine: optionalText(formData, "cuisine"),
-    kind: optionalText(formData, "kind"),
     address,
     mapsUrl,
     lat,
@@ -140,7 +139,6 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
 
 export type RestaurantPatch = Partial<{
   name: string;
-  kind: string | null;
   cuisine: string | null;
   address: string | null;
   mapsUrl: string | null;
@@ -163,7 +161,6 @@ export async function updateRestaurant(id: number, patch: RestaurantPatch) {
     if (!name) throw new Error("Name fehlt");
     values.name = name;
   }
-  if ("kind" in patch) values.kind = clean(patch.kind);
   if ("cuisine" in patch) values.cuisine = clean(patch.cuisine);
   if ("address" in patch) values.address = clean(patch.address);
   if ("mapsUrl" in patch) values.mapsUrl = clean(patch.mapsUrl);

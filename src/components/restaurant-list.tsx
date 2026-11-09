@@ -2,7 +2,7 @@
 
 import { ArrowUpDown, ListFilter, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { categoryAverage, kindOrder, type Category, type RestaurantSummary, type Status } from "@/lib/restaurants";
+import { categoryAverage, type Category, type RestaurantSummary, type Status } from "@/lib/restaurants";
 import { RestaurantCard } from "./restaurant-card";
 
 const BASE_SORTS = {
@@ -69,13 +69,6 @@ export function RestaurantList({
   const [sort, setSort] = useState(sorts[0].key);
   const compare = (sorts.find((s) => s.key === sort) ?? sorts[0]).compare;
 
-  const kinds = useMemo(
-    () =>
-      [...counts(restaurants.map((r) => r.kind))].sort(
-        (a, b) => kindOrder(a[0]) - kindOrder(b[0]) || a[0].localeCompare(b[0], "de"),
-      ),
-    [restaurants],
-  );
   const cuisines = useMemo(
     () => [...counts(restaurants.map((r) => r.cuisine))].sort((a, b) => a[0].localeCompare(b[0], "de")),
     [restaurants],
@@ -85,11 +78,9 @@ export function RestaurantList({
   const orderedCount = restaurants.filter((r) => r.ordered).length;
   const needle = q.trim().toLowerCase();
   const shown = restaurants
-    .filter((r) => !needle || `${r.name}\n${r.cuisine ?? ""}\n${r.kind ?? ""}\n${r.address ?? ""}`.toLowerCase().includes(needle))
+    .filter((r) => !needle || `${r.name}\n${r.cuisine ?? ""}\n${r.address ?? ""}`.toLowerCase().includes(needle))
     .filter((r) =>
-      filterType === "art"
-        ? r.kind === filterValue
-        : filterType === "kueche"
+      filterType === "kueche"
           ? r.cuisine === filterValue
           : filterType === "ort"
             ? r.ordered === (filterValue === "Bestellt")
@@ -121,7 +112,7 @@ export function RestaurantList({
         )}
 
         {/* Natives <select> liegt unsichtbar über dem Button: öffnet auf dem iPhone das System-Menü */}
-        {(kinds.length > 0 || cuisines.length > 0 || orderedCount > 0) && (
+        {(cuisines.length > 0 || orderedCount > 0) && (
           <MenuButton label="Filtern" icon={ListFilter} active={!!filter}>
             <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtern" className={nativeSelect}>
               <option value="">Alle anzeigen ({restaurants.length})</option>
@@ -129,15 +120,6 @@ export function RestaurantList({
                 <optgroup label="Wie">
                   <option value="ort:Vor Ort">Vor Ort ({restaurants.length - orderedCount})</option>
                   <option value="ort:Bestellt">Bestellt ({orderedCount})</option>
-                </optgroup>
-              )}
-              {kinds.length > 0 && (
-                <optgroup label="Art">
-                  {kinds.map(([name, count]) => (
-                    <option key={name} value={`art:${name}`}>
-                      {name} ({count})
-                    </option>
-                  ))}
                 </optgroup>
               )}
               {cuisines.length > 0 && (

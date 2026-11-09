@@ -18,8 +18,7 @@ export default async function MapPage() {
         status: r.status,
         overall: average,
         cuisine: r.cuisine,
-        kind: r.kind,
-        subtitle: [r.kind, r.cuisine, r.status === "wunsch" ? "Wunschliste" : average !== null ? `${formatScore(average)}/10` : null]
+        subtitle: [r.cuisine, r.status === "wunsch" ? "Wunschliste" : average !== null ? `${formatScore(average)}/10` : null]
           .filter(Boolean)
           .join(" · ") || null,
       },

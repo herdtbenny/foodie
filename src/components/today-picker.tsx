@@ -3,7 +3,7 @@
 import { Dices, Navigation, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { kindOrder, type RestaurantSummary } from "@/lib/restaurants";
+import type { RestaurantSummary } from "@/lib/restaurants";
 import { formatScore, ScorePills } from "./score";
 import { Segmented } from "./segmented";
 
@@ -20,25 +20,24 @@ const isProven = (r: RestaurantSummary) => r.status === "besucht" && (r.overall 
 
 /** "Wohin heute?": Art und Lust wählen, die App würfelt ein Restaurant. Darunter die Top 5. */
 export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] }) {
-  const [kind, setKind] = useState("");
+  const [cuisine, setCuisine] = useState("");
   const [source, setSource] = useState<Source>("egal");
   const [pick, setPick] = useState<RestaurantSummary | null>(null);
   const [rolled, setRolled] = useState(false);
 
-  const kinds = useMemo(
-    () =>
-      [...new Set(restaurants.map((r) => r.kind).filter((k): k is string => !!k))].sort(
-        (a, b) => kindOrder(a) - kindOrder(b),
-      ),
-    [restaurants],
-  );
+  // Küchen nach Häufigkeit
+  const cuisines = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of restaurants) if (r.cuisine) counts.set(r.cuisine, (counts.get(r.cuisine) ?? 0) + 1);
+    return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "de")).map(([c]) => c);
+  }, [restaurants]);
 
   const pool = restaurants
-    .filter((r) => !kind || r.kind === kind)
+    .filter((r) => !cuisine || r.cuisine === cuisine)
     .filter((r) => (source === "neu" ? r.status === "wunsch" : source === "bewaehrt" ? isProven(r) : r.status === "wunsch" || isProven(r)));
 
   const top = restaurants
-    .filter((r) => r.status === "besucht" && r.overall !== null && (!kind || r.kind === kind))
+    .filter((r) => r.status === "besucht" && r.overall !== null && (!cuisine || r.cuisine === cuisine))
     .sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0))
     .slice(0, 5);
 
@@ -59,11 +58,11 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
 
       <div className="space-y-3">
         <div className="no-scrollbar -mx-2 flex gap-1.5 overflow-x-auto px-2 sm:-mx-4 sm:px-4">
-          <button type="button" onClick={() => setKind("")} className={chip(!kind)}>
+          <button type="button" onClick={() => setCuisine("")} className={chip(!cuisine)}>
             Alles
           </button>
-          {kinds.map((k) => (
-            <button key={k} type="button" onClick={() => setKind(kind === k ? "" : k)} className={chip(kind === k)}>
+          {cuisines.map((k) => (
+            <button key={k} type="button" onClick={() => setCuisine(cuisine === k ? "" : k)} className={chip(cuisine === k)}>
               {k}
             </button>
           ))}
@@ -91,7 +90,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
         (pick ? (
           <div className="glass-ink space-y-3 rounded-3xl p-5">
             <p className="text-[11px] font-semibold tracking-wider uppercase opacity-70">
-              {[pick.status === "wunsch" ? "Wunschliste" : "Bisherige", pick.kind, pick.cuisine]
+              {[pick.status === "wunsch" ? "Wunschliste" : "Bisherige", pick.cuisine]
                 .filter(Boolean)
                 .join(" · ")}
             </p>

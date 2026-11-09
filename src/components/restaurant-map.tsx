@@ -16,7 +16,6 @@ export type MapPoint = {
   /** Gesamtnote 1–10 (färbt den Pin) */
   overall: number | null;
   cuisine: string | null;
-  kind: string | null;
   subtitle: string | null;
 };
 
@@ -33,7 +32,7 @@ export function scoreColor(score: number) {
 /** Pin: Küchen-Icon im Kreis. Besucht = nach Note gefärbt, Wunschliste = hell mit Rand. */
 function pinHtml(point: MapPoint) {
   const icon = renderToStaticMarkup(
-    createElement(cuisineIcon(point.cuisine, point.kind, point.name), { size: 17, strokeWidth: 2 }),
+    createElement(cuisineIcon(point.cuisine, point.name), { size: 17, strokeWidth: 2 }),
   );
   if (point.status === "wunsch") return `<div class="foodie-pin is-wish">${icon}</div>`;
   const style = point.overall !== null ? ` style="background:${scoreColor(point.overall)}"` : "";

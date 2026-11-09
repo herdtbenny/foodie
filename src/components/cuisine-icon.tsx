@@ -41,7 +41,7 @@ const RULES: [string[], LucideIcon][] = [
 ];
 
 export function cuisineIcon(...texts: (string | null | undefined)[]): LucideIcon {
-  // Küche zuerst, dann Art, dann Name – so gewinnt "Sushi" vor "Abendessen"
+  // Küche zuerst, dann Name
   for (const text of texts) {
     const value = text?.toLowerCase();
     if (!value) continue;
@@ -50,17 +50,15 @@ export function cuisineIcon(...texts: (string | null | undefined)[]): LucideIcon
   return UtensilsCrossed;
 }
 
-/** Passendes Icon zur Küche, Art oder zum Namen */
+/** Passendes Icon zur Küche oder zum Namen */
 export function CuisineIcon({
   cuisine,
-  kind,
   name,
   className,
 }: {
   cuisine?: string | null;
-  kind?: string | null;
   name?: string | null;
   className?: string;
 }) {
-  return createElement(cuisineIcon(cuisine, kind, name), { className, strokeWidth: 1.6, "aria-hidden": true });
+  return createElement(cuisineIcon(cuisine, name), { className, strokeWidth: 1.6, "aria-hidden": true });
 }

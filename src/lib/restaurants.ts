@@ -15,7 +15,6 @@ export type RestaurantSummary = {
   id: number;
   name: string;
   cuisine: string | null;
-  kind: string | null;
   address: string | null;
   mapsUrl: string | null;
   lat: number | null;
@@ -32,9 +31,6 @@ export type RestaurantSummary = {
   /** Gesamtnote des Restaurants: Schnitt der Personen */
   overall: number | null;
 };
-
-/** Reihenfolge, in der die Arten angezeigt werden */
-export const KINDS = ["Frühstück", "Mittagessen", "Abendessen", "Bar"];
 
 export function toStatus(value: unknown): Status {
   return value === "besucht" ? "besucht" : "wunsch";
@@ -150,7 +146,6 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
         id: r.id,
         name: r.name,
         cuisine: r.cuisine,
-        kind: r.kind,
         address: r.address,
         mapsUrl: r.mapsUrl,
         lat: r.lat,
@@ -191,16 +186,9 @@ export async function getRestaurant(id: number) {
 
 export type RestaurantDetail = NonNullable<Awaited<ReturnType<typeof getRestaurant>>>;
 
-/** Alle bisher benutzten Werte eines Feldes, für Vorschläge im Formular */
-export function valuesOf(list: { cuisine: string | null; kind: string | null }[], key: "cuisine" | "kind") {
-  const found = new Set(list.map((r) => r[key]?.trim()).filter((c): c is string => !!c));
-  if (key === "kind") KINDS.forEach((k) => found.add(k));
-  return [...found].sort((a, b) =>
-    key === "kind" ? kindOrder(a) - kindOrder(b) || a.localeCompare(b, "de") : a.localeCompare(b, "de"),
+/** Alle bisher benutzten Küchen, für Vorschläge und Filter */
+export function cuisinesOf(list: { cuisine: string | null }[]) {
+  return [...new Set(list.map((r) => r.cuisine?.trim()).filter((c): c is string => !!c))].sort((a, b) =>
+    a.localeCompare(b, "de"),
   );
-}
-
-export function kindOrder(kind: string) {
-  const index = KINDS.indexOf(kind);
-  return index === -1 ? KINDS.length : index;
 }

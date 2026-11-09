@@ -15,7 +15,7 @@ import { StatusToggle } from "@/components/status-toggle";
 import { requirePerson } from "@/lib/auth";
 import { avatarUrls } from "@/lib/avatars";
 import { PEOPLE, PERSON_IDS } from "@/lib/people";
-import { activeCategories, getRestaurant, listRestaurants, valuesOf, weightPercent } from "@/lib/restaurants";
+import { activeCategories, cuisinesOf, getRestaurant, listRestaurants, weightPercent } from "@/lib/restaurants";
 
 export async function generateMetadata({ params }: PageProps<"/restaurants/[id]">) {
   const { id } = await params;
@@ -44,13 +44,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
         <h1 className="sr-only">{restaurant.name}</h1>
         <EditableTitle id={restaurant.id} name={restaurant.name} />
-        <MetaChips
-          id={restaurant.id}
-          kind={restaurant.kind}
-          cuisine={restaurant.cuisine}
-          kinds={valuesOf(all, "kind")}
-          cuisines={valuesOf(all, "cuisine")}
-        />
+        <MetaChips id={restaurant.id} cuisine={restaurant.cuisine} cuisines={cuisinesOf(all)} />
         {restaurant.address && (
           <p className="flex items-start gap-1.5 text-sm text-muted">
             <MapPin className="mt-0.5 size-3.5 shrink-0" />
@@ -76,7 +70,6 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
                   status: restaurant.status,
                   overall: average,
                   cuisine: restaurant.cuisine,
-                  kind: restaurant.kind,
                   subtitle: null,
                 },
               ]}
@@ -104,52 +97,59 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
             <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />
           </div>
 
-          {/* Gesamtnote */}
-          <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
-            <div className="press flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white">
-              <span className="font-display text-3xl leading-none font-semibold tabular-nums">
-                {average !== null ? formatScore(average) : "–"}
-              </span>
-              <span className="text-[10px] opacity-80">gesamt</span>
-            </div>
-            <div className="min-w-0 flex-1 space-y-1.5">
-              {PERSON_IDS.map((p) => (
-                <div key={p} className="flex items-center gap-2">
-                  <Avatar person={p} url={avatars[p]} className="size-6 text-[10px]" />
-                  <span className="flex-1 text-sm">{PEOPLE[p].name}</span>
-                  <span className="font-semibold tabular-nums">
-                    {restaurant.scores[p] != null ? formatScore(restaurant.scores[p]!) : "–"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Kategorien */}
-          <div className="space-y-6 card rounded-3xl p-4">
-            {restaurant.categories.length === 0 && (
-              <p className="text-sm text-muted">Noch keine Kategorien angelegt.</p>
-            )}
-            {restaurant.categories.map((cat) => (
-              <CategoryRating
-                key={`${cat.id}-${restaurant.ratings[cat.id]?.[person] ?? ""}`}
-                restaurantId={restaurant.id}
-                categoryId={cat.id}
-                name={cat.name}
-                percent={weightPercent(activeCategories(restaurant.categories, restaurant.ordered), cat)}
-                disabled={restaurant.ordered && cat.onSiteOnly}
-                person={person}
-                own={restaurant.ratings[cat.id]?.[person]}
-                others={PERSON_IDS.filter((p) => p !== person).map((p) => ({
-                  person: p,
-                  score: restaurant.ratings[cat.id]?.[p],
-                }))}
-              />
-            ))}
-          </div>
         </section>
       ) : (
         <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
+      )}
+
+      {visited && (
+        <section className="space-y-3">
+          <h2 className="px-2 font-display text-2xl font-semibold">Bewertung</h2>
+          {/* Alles zur Bewertung in einer Karte: oben Gesamtnote, darunter die Kategorien */}
+          <div className="card divide-y divide-line rounded-3xl">
+            <div className="flex items-center gap-4 p-4">
+              <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35)]">
+                <span className="font-display text-3xl leading-none font-semibold tabular-nums">
+                  {average !== null ? formatScore(average) : "–"}
+                </span>
+                <span className="text-[10px] opacity-80">gesamt</span>
+              </div>
+              <div className="min-w-0 flex-1 space-y-1.5">
+                {PERSON_IDS.map((p) => (
+                  <div key={p} className="flex items-center gap-2">
+                    <Avatar person={p} url={avatars[p]} className="size-6 text-[10px]" />
+                    <span className="flex-1 text-sm">{PEOPLE[p].name}</span>
+                    <span className={`font-display text-xl font-semibold tabular-nums ${PEOPLE[p].text}`}>
+                      {restaurant.scores[p] != null ? formatScore(restaurant.scores[p]!) : "–"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6 p-4">
+              {restaurant.categories.length === 0 && (
+                <p className="text-sm text-muted">Noch keine Kategorien angelegt.</p>
+              )}
+              {restaurant.categories.map((cat) => (
+                <CategoryRating
+                  key={`${cat.id}-${restaurant.ratings[cat.id]?.[person] ?? ""}`}
+                  restaurantId={restaurant.id}
+                  categoryId={cat.id}
+                  name={cat.name}
+                  percent={weightPercent(activeCategories(restaurant.categories, restaurant.ordered), cat)}
+                  disabled={restaurant.ordered && cat.onSiteOnly}
+                  person={person}
+                  own={restaurant.ratings[cat.id]?.[person]}
+                  others={PERSON_IDS.filter((p) => p !== person).map((p) => ({
+                    person: p,
+                    score: restaurant.ratings[cat.id]?.[p],
+                  }))}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       {visited && (
