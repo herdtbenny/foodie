@@ -14,21 +14,6 @@
   --evelyne: #2f8a5f;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #171512;
-    --surface: #211e1a;
-    --ink: #f3ece0;
-    --muted: #a39a8e;
-    --line: #37322b;
-    --accent: #f3ece0;
-    --accent-ink: #1d1b18;
-    --pop: #ef5544;
-    --german: #7aa2ff;
-    --evelyne: #5fcf95;
-  }
-}
-
 @theme inline {
   --color-paper: var(--paper);
   --color-surface: var(--surface);
@@ -57,6 +42,8 @@ body {
 }
 
 html {
+  /* Immer hell: Creme-Weiß, auch wenn das Gerät auf Dunkel steht */
+  color-scheme: light;
   background: var(--paper);
 }
 
@@ -160,11 +147,6 @@ body {
   font-family: var(--font-archivo), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  .leaflet-tile-pane {
-    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
-  }
-}
 
 /* Zoom-Buttons rund wie alle Buttons */
 .leaflet-bar {

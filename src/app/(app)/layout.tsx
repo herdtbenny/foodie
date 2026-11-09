@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <header className="flex items-center justify-between gap-3 px-2 pt-[max(env(safe-area-inset-top),1rem)] pb-3 sm:px-4">
         <Link href="/" className="flex min-w-0 items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon.svg" alt="" className="size-11 shrink-0 rounded-2xl" />
+          <img src="/logo.svg" alt="" className="h-10 w-auto shrink-0" />
           <span className="font-display text-3xl leading-tight font-semibold tracking-tight">Foodie</span>
         </Link>
         <div className="flex shrink-0 items-center gap-2">

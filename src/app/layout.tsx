@@ -16,10 +16,7 @@ export const viewport: Viewport = {
   // Verhindert, dass iOS beim Tippen in Felder hineinzoomt und den Zoom behält.
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f1e7" },
-    { media: "(prefers-color-scheme: dark)", color: "#171512" },
-  ],
+  themeColor: "#f6f1e7",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
