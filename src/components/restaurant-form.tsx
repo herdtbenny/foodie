@@ -62,8 +62,6 @@ export function RestaurantForm({
   const [coords, setCoords] = useState<Coords>(
     restaurant?.lat != null && restaurant.lng != null ? { lat: restaurant.lat, lng: restaurant.lng } : null,
   );
-  // Position kam aus dem Link? Dann ändert eine andere Adresse nichts daran.
-  const [coordsFromLink, setCoordsFromLink] = useState(!!restaurant?.mapsUrl);
   const [linkState, setLinkState] = useState<LinkState>("idle");
   const lastLookup = useRef(restaurant?.mapsUrl ?? "");
 
@@ -82,14 +80,12 @@ export function RestaurantForm({
       setMapsUrl(info.mapsUrl);
       lastLookup.current = info.mapsUrl;
       if (info.name) setName((current) => current || info.name!);
-      if (info.address) setAddress((current) => current || info.address!);
+      setAddress(info.address ?? "");
       if (info.lat != null && info.lng != null) {
         setCoords({ lat: info.lat, lng: info.lng });
-        setCoordsFromLink(true);
         setLinkState("found");
       } else {
         setCoords(null);
-        setCoordsFromLink(false);
         setLinkState("nocoords");
       }
     } catch {
@@ -133,6 +129,7 @@ export function RestaurantForm({
       <input type="hidden" name="lat" value={coords?.lat ?? ""} />
       <input type="hidden" name="lng" value={coords?.lng ?? ""} />
       <input type="hidden" name="status" value={status} />
+      <input type="hidden" name="address" value={address} />
       <input type="hidden" name="ordered" value={ordered ? "1" : ""} />
 
       {/* Google-Maps-Link zuerst – füllt den Rest aus */}
@@ -175,7 +172,7 @@ export function RestaurantForm({
           )}
           {linkState === "nocoords" && (
             <>
-              <MapPinOff className="size-3.5" /> Keine Position im Link – wird beim Speichern über die Adresse gesucht
+              <MapPinOff className="size-3.5" /> Keine Position im Link – wird beim Speichern gesucht
             </>
           )}
           {linkState === "invalid" && <>Das sieht nicht nach einem Google-Maps-Link aus.</>}
@@ -185,7 +182,7 @@ export function RestaurantForm({
                 <MapPin className="size-3.5 text-german" /> Position gespeichert
               </>
             ) : (
-              <>Optional – ohne Link wird die Adresse gesucht.</>
+              <>In Google Maps: Teilen → Link kopieren, hier einfügen.</>
             ))}
         </p>
         {coords && (
@@ -223,19 +220,6 @@ export function RestaurantForm({
               <option key={c} value={c} />
             ))}
           </datalist>
-        </Field>
-        <Field label="Adresse" hint="optional">
-          <input
-            name="address"
-            value={address}
-            onChange={(e) => {
-              setAddress(e.target.value);
-              // Selbst getippte Adresse: Position beim Speichern neu suchen
-              if (!coordsFromLink) setCoords(null);
-            }}
-            placeholder="Straße, Ort"
-            className={inputClass}
-          />
         </Field>
       </div>
 

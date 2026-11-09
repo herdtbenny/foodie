@@ -156,58 +156,31 @@ export function MetaChips({ id, cuisine, cuisines }: { id: number; cuisine: stri
 const fieldClass =
   "min-w-0 flex-1 bg-transparent py-3 text-right outline-none placeholder:text-muted/60 focus:text-left";
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex items-center gap-3 px-4">
-      <span className="w-20 shrink-0 text-sm text-muted">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-/** Adresse und Google-Maps-Link – speichern beim Verlassen des Feldes */
-export function RestaurantInfo({
-  id,
-  address,
-  mapsUrl,
-}: {
-  id: number;
-  address: string | null;
-  mapsUrl: string | null;
-}) {
+/** Google-Maps-Link – Position und Adresse kommen daraus */
+export function RestaurantInfo({ id, mapsUrl }: { id: number; mapsUrl: string | null }) {
   const { pending, save } = useSave(id);
-  const [values, setValues] = useState({ address: address ?? "", mapsUrl: mapsUrl ?? "" });
-  const saved = { address: address ?? "", mapsUrl: mapsUrl ?? "" };
+  const [values, setValues] = useState({ mapsUrl: mapsUrl ?? "" });
+  const saved = { mapsUrl: mapsUrl ?? "" };
 
-  function commit(key: "address" | "mapsUrl", raw?: string) {
+  function commit(key: "mapsUrl", raw?: string) {
     const next = (raw ?? values[key]).trim();
     if (next === saved[key]) return;
-    const labels = { address: "Adresse", mapsUrl: "Google-Maps-Link" };
+    const labels = { mapsUrl: "Google-Maps-Link" };
     save({ [key]: next || null }, `${labels[key]} gespeichert`, () => setValues((v) => ({ ...v, [key]: saved[key] })));
   }
 
   return (
     <section className="space-y-3">
       <div className="flex items-center gap-2 px-2">
-        <h2 className="font-display text-2xl font-semibold">Infos</h2>
+        <h2 className="font-display text-2xl font-semibold">Google Maps</h2>
         {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}
       </div>
 
 
       <div className="divide-y divide-line card rounded-3xl">
-        <Row label="Adresse">
-          <input
-            value={values.address}
-            onChange={(e) => setValues((v) => ({ ...v, address: e.target.value }))}
-            onBlur={() => commit("address")}
-            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-            placeholder="Straße, Ort"
-            className={fieldClass}
-          />
-        </Row>
         <div className="flex items-center gap-3 px-4">
           <label className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="w-20 shrink-0 text-sm text-muted">Maps-Link</span>
+            <span className="w-12 shrink-0 text-sm text-muted">Link</span>
             <input
               type="text"
               inputMode="url"
@@ -222,7 +195,7 @@ export function RestaurantInfo({
               }}
               onBlur={() => commit("mapsUrl")}
               onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-              placeholder="Link einfügen"
+              placeholder="Google-Maps-Link einfügen"
               className={`${fieldClass} truncate`}
             />
           </label>

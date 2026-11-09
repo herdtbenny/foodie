@@ -173,7 +173,7 @@ export async function updateRestaurant(id: number, patch: RestaurantPatch) {
         values.lat = info.lat;
         values.lng = info.lng;
       }
-      if (!current.address && info.address) values.address = info.address;
+      if (info.address) values.address = info.address;
     }
   } else if ("address" in patch && values.address && !current.mapsUrl) {
     // Ohne Maps-Link: Position aus der Adresse

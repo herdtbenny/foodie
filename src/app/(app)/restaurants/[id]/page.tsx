@@ -168,7 +168,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         </section>
       )}
 
-      <RestaurantInfo id={restaurant.id} address={restaurant.address} mapsUrl={restaurant.mapsUrl} />
+      <RestaurantInfo id={restaurant.id} mapsUrl={restaurant.mapsUrl} />
 
       <section className="space-y-3">
         <h2 className="px-2 font-display text-2xl font-semibold">Notizen</h2>
