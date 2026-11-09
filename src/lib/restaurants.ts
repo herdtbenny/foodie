@@ -1,10 +1,12 @@
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "./db";
-import { categories, ratings, restaurants } from "./db/schema";
+import { categories, ratings, restaurants, reviews } from "./db/schema";
 import { isPerson, PERSON_IDS, type Person } from "./people";
 
 export type Scores = Partial<Record<Person, number>>;
 export type Status = "wunsch" | "besucht";
+export type Review = { recommend: boolean; dish: string | null; photoUrl: string | null };
+export type Reviews = Partial<Record<Person, Review>>;
 export type Category = { id: number; name: string; weight: number; position: number };
 /** categoryId → Person → Note */
 export type CategoryRatings = Record<number, Scores>;
@@ -27,6 +29,8 @@ export type RestaurantSummary = {
   scores: Scores;
   /** Gesamtnote des Restaurants: Schnitt der Personen */
   overall: number | null;
+  /** Wer es weiterempfiehlt */
+  recommendedBy: Person[];
 };
 
 /** Reihenfolge, in der die Arten angezeigt werden */
@@ -99,14 +103,35 @@ function groupRatings(rows: { restaurantId: number; categoryId: number; person: 
   return byRestaurant;
 }
 
+function groupReviews(rows: (Review & { restaurantId: number; person: string })[]) {
+  const byRestaurant = new Map<number, Reviews>();
+  for (const row of rows) {
+    if (!isPerson(row.person)) continue;
+    const entry = byRestaurant.get(row.restaurantId) ?? {};
+    entry[row.person] = { recommend: row.recommend, dish: row.dish, photoUrl: row.photoUrl };
+    byRestaurant.set(row.restaurantId, entry);
+  }
+  return byRestaurant;
+}
+
+const reviewColumns = {
+  restaurantId: reviews.restaurantId,
+  person: reviews.person,
+  recommend: reviews.recommend,
+  dish: reviews.dish,
+  photoUrl: reviews.photoUrl,
+};
+
 export async function listRestaurants(): Promise<{ restaurants: RestaurantSummary[]; categories: Category[] }> {
   const db = getDb();
-  const [rows, ratingRows, cats] = await Promise.all([
+  const [rows, ratingRows, cats, reviewRows] = await Promise.all([
     db.select().from(restaurants),
     db.select().from(ratings),
     listCategories(),
+    db.select(reviewColumns).from(reviews),
   ]);
   const grouped = groupRatings(ratingRows);
+  const reviewMap = groupReviews(reviewRows);
 
   return {
     categories: cats,
@@ -127,6 +152,7 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
         createdAt: r.createdAt.toISOString(),
         ratings: byCategory,
         ...overallScores(byCategory, cats),
+        recommendedBy: PERSON_IDS.filter((p) => reviewMap.get(r.id)?.[p]?.recommend),
       };
     }),
   };
@@ -135,15 +161,23 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
 export async function getRestaurant(id: number) {
   if (!Number.isInteger(id)) return null;
   const db = getDb();
-  const [[row], ratingRows, cats] = await Promise.all([
+  const [[row], ratingRows, cats, reviewRows] = await Promise.all([
     db.select().from(restaurants).where(eq(restaurants.id, id)),
     db.select().from(ratings).where(eq(ratings.restaurantId, id)),
     listCategories(),
+    db.select(reviewColumns).from(reviews).where(eq(reviews.restaurantId, id)),
   ]);
   if (!row) return null;
 
   const byCategory = groupRatings(ratingRows).get(id) ?? {};
-  return { ...row, status: toStatus(row.status), ratings: byCategory, categories: cats, ...overallScores(byCategory, cats) };
+  return {
+    ...row,
+    status: toStatus(row.status),
+    ratings: byCategory,
+    categories: cats,
+    reviews: groupReviews(reviewRows).get(id) ?? {},
+    ...overallScores(byCategory, cats),
+  };
 }
 
 export type RestaurantDetail = NonNullable<Awaited<ReturnType<typeof getRestaurant>>>;

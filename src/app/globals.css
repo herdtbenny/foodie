@@ -107,8 +107,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .foodie-pin.is-visited {
-  background: var(--pop);
+  background: var(--ink);
   color: #fff;
+}
+.foodie-pin svg {
+  display: block;
 }
 .foodie-pin.is-wish {
   background: var(--surface);

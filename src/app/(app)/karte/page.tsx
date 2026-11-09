@@ -16,7 +16,9 @@ export default async function MapPage() {
         lat: r.lat,
         lng: r.lng,
         status: r.status,
-        score: average !== null ? formatScore(average) : null,
+        overall: average,
+        cuisine: r.cuisine,
+        kind: r.kind,
         subtitle: [r.kind, r.cuisine, r.status === "wunsch" ? "Wunschliste" : average !== null ? `${formatScore(average)}/10` : null]
           .filter(Boolean)
           .join(" · ") || null,

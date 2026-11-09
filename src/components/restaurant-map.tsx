@@ -3,7 +3,9 @@
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap } from "leaflet";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { createElement, useEffect, useRef } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { cuisineIcon } from "./cuisine-icon";
 
 export type MapPoint = {
   id: number;
@@ -11,8 +13,10 @@ export type MapPoint = {
   lat: number;
   lng: number;
   status: "wunsch" | "besucht";
-  /** Durchschnitt, schon formatiert ("8,5") */
-  score: string | null;
+  /** Gesamtnote 1–10 (färbt den Pin) */
+  overall: number | null;
+  cuisine: string | null;
+  kind: string | null;
   subtitle: string | null;
 };
 
@@ -20,11 +24,20 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-/** Pin: besucht = gefüllt mit Bewertung, Wunschliste = Ring mit Stern. */
+/** Gesamtnote → Farbe: 1 = Rot, 10 = Grün (ein Farbton pro Pin, kein Verlauf) */
+export function scoreColor(score: number) {
+  const t = Math.min(Math.max((score - 1) / 9, 0), 1);
+  return `hsl(${Math.round(t * 125)} 62% 42%)`;
+}
+
+/** Pin: Küchen-Icon im Kreis. Besucht = nach Note gefärbt, Wunschliste = hell mit Rand. */
 function pinHtml(point: MapPoint) {
-  const visited = point.status === "besucht";
-  const label = visited ? (point.score ?? "–") : "★";
-  return `<div class="foodie-pin ${visited ? "is-visited" : "is-wish"}"><span>${escapeHtml(label)}</span></div>`;
+  const icon = renderToStaticMarkup(
+    createElement(cuisineIcon(point.cuisine, point.kind, point.name), { size: 17, strokeWidth: 2 }),
+  );
+  if (point.status === "wunsch") return `<div class="foodie-pin is-wish">${icon}</div>`;
+  const style = point.overall !== null ? ` style="background:${scoreColor(point.overall)}"` : "";
+  return `<div class="foodie-pin is-visited"${style}>${icon}</div>`;
 }
 
 const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
@@ -57,7 +70,7 @@ export function RestaurantMap({
 
       map.current?.remove();
       const instance = L.map(container.current, {
-        zoomControl: interactive,
+        zoomControl: false,
         dragging: interactive,
         scrollWheelZoom: interactive,
         touchZoom: interactive,
@@ -66,6 +79,8 @@ export function RestaurantMap({
         attributionControl: true,
       });
       map.current = instance;
+      // Zoom unten rechts, oben liegt die Filterleiste
+      if (interactive) L.control.zoom({ position: "bottomright" }).addTo(instance);
 
       // Dunkelmodus: Kacheln per CSS-Filter abdunkeln (siehe globals.css)
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {

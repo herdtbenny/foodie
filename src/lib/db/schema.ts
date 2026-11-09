@@ -1,4 +1,4 @@
-import { date, doublePrecision, integer, pgTable, primaryKey, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, date, doublePrecision, integer, pgTable, primaryKey, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const restaurants = pgTable("restaurants", {
   id: serial("id").primaryKey(),
@@ -25,8 +25,8 @@ export const restaurants = pgTable("restaurants", {
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  /** 0–5; 0 = zählt nicht zur Gesamtnote */
-  weight: integer("weight").notNull().default(1),
+  /** Anteil an der Gesamtnote in Prozent (5er-Schritte, alle zusammen 100); 0 = zählt nicht */
+  weight: integer("weight").notNull().default(0),
   position: integer("position").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -46,4 +46,21 @@ export const ratings = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.restaurantId, t.categoryId, t.person] })],
+);
+
+/** Pro Person und Restaurant: Weiterempfehlung, was man gegessen hat, ein Foto */
+export const reviews = pgTable(
+  "reviews",
+  {
+    restaurantId: integer("restaurant_id")
+      .notNull()
+      .references(() => restaurants.id, { onDelete: "cascade" }),
+    person: text("person").notNull(),
+    recommend: boolean("recommend").notNull().default(false),
+    dish: text("dish"),
+    /** Vercel Blob */
+    photoUrl: text("photo_url"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.restaurantId, t.person] })],
 );

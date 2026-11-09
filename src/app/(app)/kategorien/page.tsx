@@ -10,8 +10,8 @@ export default async function CategoriesPage() {
       <div className="space-y-2">
         <h1 className="font-display text-4xl font-semibold">Kategorien</h1>
         <p className="text-muted">
-          Jeder bewertet jede Kategorie von 1 bis 10. Die Gesamtnote ist der gewichtete Schnitt – je höher das
-          Gewicht, desto mehr zählt die Kategorie. Gilt für euch beide.
+          Jeder bewertet jede Kategorie von 1 bis 10. Verteilt 100 % darauf, wie stark jede Kategorie in die
+          Gesamtnote eingeht. Gilt für euch beide.
         </p>
       </div>
       <CategoryManager key={categories.map((c) => c.id).join("-")} categories={categories} />

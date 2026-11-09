@@ -1,12 +1,13 @@
 "use server";
 
+import { del, put } from "@vercel/blob";
 import { and, eq, max } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requirePerson } from "./auth";
 import { getDb } from "./db";
-import { categories, ratings, restaurants } from "./db/schema";
+import { categories, ratings, restaurants, reviews } from "./db/schema";
 import { todayBerlin } from "./format-date";
 import { geocodeFirst, lookupMaps, type MapsInfo } from "./maps";
 import { isPerson } from "./people";
@@ -138,7 +139,66 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
 
 export async function deleteRestaurant(id: number) {
   await requirePerson();
-  await getDb().delete(restaurants).where(eq(restaurants.id, id));
+  const db = getDb();
+  const photos = await db.select({ url: reviews.photoUrl }).from(reviews).where(eq(reviews.restaurantId, id));
+  await db.delete(restaurants).where(eq(restaurants.id, id));
+  const urls = photos.map((p) => p.url).filter((u): u is string => !!u);
+  if (urls.length) await del(urls);
+  refresh();
+}
+
+/** Eigenen Eintrag (Empfehlung, Gericht, Foto) anlegen oder ändern */
+async function updateReview(
+  restaurantId: number,
+  values: Partial<{ recommend: boolean; dish: string | null; photoUrl: string | null }>,
+) {
+  const person = await requirePerson();
+  const db = getDb();
+  const [previous] = await db
+    .select({ photoUrl: reviews.photoUrl })
+    .from(reviews)
+    .where(and(eq(reviews.restaurantId, restaurantId), eq(reviews.person, person)));
+  await db
+    .insert(reviews)
+    .values({ restaurantId, person, ...values })
+    .onConflictDoUpdate({ target: [reviews.restaurantId, reviews.person], set: { ...values, updatedAt: new Date() } });
+  // Altes Foto aufräumen, wenn es ersetzt oder entfernt wurde
+  if ("photoUrl" in values && previous?.photoUrl && previous.photoUrl !== values.photoUrl) {
+    await del(previous.photoUrl).catch(() => {});
+  }
+  refresh();
+}
+
+export async function setRecommend(restaurantId: number, recommend: boolean) {
+  await updateReview(restaurantId, { recommend });
+}
+
+export async function saveDish(restaurantId: number, dish: string) {
+  await updateReview(restaurantId, { dish: dish.trim().slice(0, 2000) || null });
+}
+
+/** Eigenes Foto hochladen (kommt bereits verkleinert aus dem Browser) */
+export async function uploadPhoto(restaurantId: number, formData: FormData) {
+  const person = await requirePerson();
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0) throw new Error("Kein Foto");
+  if (!file.type.startsWith("image/")) throw new Error("Kein Bild");
+  const blob = await put(`fotos/${restaurantId}/${person}-${crypto.randomUUID()}.jpg`, file, {
+    access: "public",
+    contentType: file.type,
+  });
+  await updateReview(restaurantId, { photoUrl: blob.url });
+}
+
+export async function removePhoto(restaurantId: number) {
+  await updateReview(restaurantId, { photoUrl: null });
+}
+
+/** "Zuletzt besucht" direkt auf der Detailseite setzen */
+export async function setVisitedOn(restaurantId: number, date: string | null) {
+  await requirePerson();
+  const value = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+  await getDb().update(restaurants).set({ visitedOn: value }).where(eq(restaurants.id, restaurantId));
   refresh();
 }
 
@@ -172,7 +232,8 @@ export async function addCategory(name: string) {
   if (!value) return;
   const db = getDb();
   const [{ last }] = await db.select({ last: max(categories.position) }).from(categories);
-  await db.insert(categories).values({ name: value, weight: 1, position: (last ?? -1) + 1 });
+  // Neue Kategorie startet mit 0 %, die Prozente verteilt man danach selbst
+  await db.insert(categories).values({ name: value, weight: 0, position: (last ?? -1) + 1 });
   refresh();
 }
 
@@ -184,11 +245,15 @@ export async function renameCategory(id: number, name: string) {
   refresh();
 }
 
-/** Gewichtung 0–5 (0 = zählt nicht zur Gesamtnote) */
+/** Anteil in Prozent (5er-Schritte). Alle Kategorien zusammen höchstens 100 %. */
 export async function setCategoryWeight(id: number, weight: number) {
   await requirePerson();
-  if (!Number.isInteger(weight) || weight < 0 || weight > 5) return;
-  await getDb().update(categories).set({ weight }).where(eq(categories.id, id));
+  if (!Number.isInteger(weight) || weight < 0 || weight > 100 || weight % 5 !== 0) return;
+  const db = getDb();
+  const others = await db.select({ id: categories.id, weight: categories.weight }).from(categories);
+  const rest = others.filter((c) => c.id !== id).reduce((sum, c) => sum + c.weight, 0);
+  if (rest + weight > 100) throw new Error("Mehr als 100 %");
+  await db.update(categories).set({ weight }).where(eq(categories.id, id));
   refresh();
 }
 

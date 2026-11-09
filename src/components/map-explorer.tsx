@@ -3,7 +3,7 @@
 import { MapPinOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { RestaurantMap, type MapPoint } from "./restaurant-map";
+import { RestaurantMap, scoreColor, type MapPoint } from "./restaurant-map";
 
 type Filter = "alle" | "besucht" | "wunsch";
 
@@ -51,12 +51,21 @@ export function MapExplorer({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted">
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span className="size-3 rounded-full bg-accent" /> Besucht (mit Note)
+          Note
+          {[1, 4, 7, 10].map((n) => (
+            <span
+              key={n}
+              className="flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+              style={{ background: scoreColor(n) }}
+            >
+              {n}
+            </span>
+          ))}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="size-3 rounded-full border-2 border-accent bg-surface" /> Wunschliste
+          <span className="size-4 rounded-full border-2 border-ink bg-surface" /> Wunschliste
         </span>
       </div>
 

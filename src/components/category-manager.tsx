@@ -1,13 +1,13 @@
 "use client";
 
-import { LoaderCircle, Plus, Trash } from "lucide-react";
+import { Check, LoaderCircle, Minus, Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { addCategory, deleteCategory, renameCategory, setCategoryWeight } from "@/lib/actions";
-import { weightPercent, type Category } from "@/lib/restaurants";
+import type { Category } from "@/lib/restaurants";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 
-const WEIGHTS = [0, 1, 2, 3, 4, 5];
+const STEP = 5;
 
 /** Kategorien anlegen, umbenennen, löschen und gewichten. Gilt für euch beide. */
 export function CategoryManager({ categories }: { categories: Category[] }) {
@@ -27,9 +27,13 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
     });
   }
 
+  const used = list.reduce((sum, c) => sum + c.weight, 0);
+  const left = 100 - used;
+
   function weigh(cat: Category, weight: number) {
+    if (weight < 0 || weight - cat.weight > left) return;
     setList((current) => current.map((c) => (c.id === cat.id ? { ...c, weight } : c)));
-    run(() => setCategoryWeight(cat.id, weight), `${cat.name}: Gewicht ${weight}`);
+    run(() => setCategoryWeight(cat.id, weight), `${cat.name}: ${weight} %`);
   }
 
   function rename(cat: Category, name: string) {
@@ -63,6 +67,21 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
 
   return (
     <div className="space-y-4">
+      <div
+        className={`flex items-center justify-between rounded-full px-5 py-3 text-sm font-medium ${
+          left === 0 ? "bg-ink text-paper" : "bg-pop text-white"
+        }`}
+        aria-live="polite"
+      >
+        {left === 0 ? (
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="size-4" /> 100 % verteilt
+          </span>
+        ) : (
+          <span>Noch {left} % zu verteilen</span>
+        )}
+        <span className="tabular-nums opacity-80">{used} / 100 %</span>
+      </div>
       <ul className="space-y-2">
         {list.map((cat) => (
           <li key={cat.id} className="space-y-3 rounded-3xl border border-line bg-surface p-4">
@@ -74,9 +93,6 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                 aria-label="Name der Kategorie"
                 className="min-w-0 flex-1 rounded-full bg-transparent px-1 font-display text-xl font-semibold outline-none focus:bg-paper focus:px-3"
               />
-              <span className="font-display text-2xl font-semibold text-pop tabular-nums">
-                {weightPercent(list, cat)} %
-              </span>
               <button
                 type="button"
                 onClick={() => remove(cat)}
@@ -86,26 +102,36 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                 <Trash className="size-4" />
               </button>
             </div>
-            <div>
-              <p className="mb-1.5 text-xs text-muted">Gewicht</p>
-              <div role="radiogroup" aria-label={`Gewicht ${cat.name}`} className="flex gap-1.5">
-                {WEIGHTS.map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    role="radio"
-                    aria-checked={cat.weight === w}
-                    onClick={() => weigh(cat, w)}
-                    className={`flex size-10 items-center justify-center rounded-full text-sm font-semibold tabular-nums transition-colors ${
-                      cat.weight === w ? "bg-ink text-paper" : "border border-line text-muted hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {w}
-                  </button>
-                ))}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => weigh(cat, cat.weight - STEP)}
+                disabled={cat.weight === 0}
+                aria-label={`${cat.name} weniger`}
+                className="flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-ink disabled:opacity-30"
+              >
+                <Minus className="size-4" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <p className="text-center font-display text-3xl leading-none font-semibold tabular-nums">
+                  {cat.weight} %
+                </p>
+                {/* Anteil als Balken – einfarbig, kein Verlauf */}
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
+                  <div className="h-full rounded-full bg-pop transition-[width]" style={{ width: `${cat.weight}%` }} />
+                </div>
               </div>
-              {cat.weight === 0 && <p className="mt-1.5 text-xs text-muted">Zählt nicht zur Gesamtnote.</p>}
+              <button
+                type="button"
+                onClick={() => weigh(cat, cat.weight + STEP)}
+                disabled={left < STEP}
+                aria-label={`${cat.name} mehr`}
+                className="flex size-11 shrink-0 items-center justify-center rounded-full bg-ink text-paper disabled:opacity-30"
+              >
+                <Plus className="size-4" />
+              </button>
             </div>
+            {cat.weight === 0 && <p className="text-center text-xs text-muted">Zählt nicht zur Gesamtnote.</p>}
           </li>
         ))}
       </ul>

@@ -1,7 +1,8 @@
-import { Bookmark, MapPin, Navigation } from "lucide-react";
+import { Bookmark, MapPin, Navigation, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
 import type { RestaurantSummary } from "@/lib/restaurants";
+import { CuisineIcon } from "./cuisine-icon";
 import { formatScore, ScorePills } from "./score";
 
 /** Ein Restaurant in der Liste. Ganze Karte führt zur Detailseite, rechts geht's direkt zu Google Maps. */
@@ -12,32 +13,33 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
 
   return (
     <div className="relative flex min-w-0 items-center gap-3 rounded-3xl border border-line bg-surface p-2 pr-3">
+      {/* Icon zur Küche statt Foto */}
       <div
-        className={`flex size-16 shrink-0 flex-col items-center justify-center rounded-2xl ${
-          visited ? (average !== null ? "bg-pop text-white" : "bg-ink text-paper") : "border border-line text-muted"
+        className={`flex size-16 shrink-0 items-center justify-center rounded-2xl ${
+          visited ? "bg-ink text-paper" : "border border-line text-muted"
         }`}
       >
-        {visited ? (
-          average !== null ? (
-            <>
-              <span className="font-display text-2xl leading-none font-semibold tabular-nums">{formatScore(average)}</span>
-              <span className="mt-0.5 text-[10px] opacity-80">von 10</span>
-            </>
-          ) : (
-            <span className="text-xs font-medium">offen</span>
-          )
-        ) : (
-          <Bookmark className="size-6" strokeWidth={1.8} />
-        )}
+        <CuisineIcon cuisine={restaurant.cuisine} kind={restaurant.kind} name={restaurant.name} className="size-7" />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <Link
-          href={`/restaurants/${restaurant.id}`}
-          className="truncate font-display text-lg leading-snug font-semibold after:absolute after:inset-0 after:rounded-3xl"
-        >
-          {restaurant.name}
-        </Link>
+        <div className="flex min-w-0 items-center gap-2">
+          <Link
+            href={`/restaurants/${restaurant.id}`}
+            className="min-w-0 truncate font-display text-lg leading-snug font-semibold after:absolute after:inset-0 after:rounded-3xl"
+          >
+            {restaurant.name}
+          </Link>
+          {visited && average !== null && (
+            <span
+              title="Gesamtnote"
+              className="shrink-0 rounded-full bg-pop px-2 py-0.5 text-sm font-semibold text-white tabular-nums"
+            >
+              {formatScore(average)}
+            </span>
+          )}
+          {!visited && <Bookmark className="size-3.5 shrink-0 text-muted" aria-label="Wunschliste" />}
+        </div>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
           {tags && <span className="truncate text-[11px] font-semibold tracking-wider uppercase">{tags}</span>}
           {!tags && restaurant.address && <span className="truncate">{restaurant.address}</span>}
@@ -51,6 +53,15 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
         {visited ? (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <ScorePills scores={restaurant.scores} />
+            {restaurant.recommendedBy.length > 0 && (
+              <span
+                title="Weiterempfohlen"
+                className="inline-flex items-center gap-1 rounded-full bg-pop px-2 py-0.5 text-xs font-semibold text-white"
+              >
+                <ThumbsUp className="size-3" />
+                {restaurant.recommendedBy.length === 2 ? "beide" : ""}
+              </span>
+            )}
             {restaurant.visitedOn && <span className="text-xs text-muted">{formatDate(restaurant.visitedOn)}</span>}
           </div>
         ) : null}

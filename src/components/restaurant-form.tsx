@@ -195,7 +195,7 @@ export function RestaurantForm({
             interactive={false}
             zoom={16}
             className="h-32 rounded-2xl"
-            points={[{ id: 0, name: name || "Hier", ...coords, status, score: null, subtitle: null }]}
+            points={[{ id: 0, name: name || "Hier", ...coords, status, overall: null, cuisine: null, kind, subtitle: null }]}
           />
         )}
       </div>
@@ -288,7 +288,7 @@ export function RestaurantForm({
       </fieldset>
 
       {status === "besucht" && (
-        <Field label="Wann wart ihr da?" hint="optional">
+        <Field label="Zuletzt besucht" hint="optional">
           <input
             name="visitedOn"
             type="date"

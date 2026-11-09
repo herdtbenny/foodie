@@ -1,15 +1,16 @@
-import { ArrowLeft, Calendar, MapPin, Navigation, Pencil, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, MapPin, Navigation, Pencil, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { NotesForm } from "@/components/notes-form";
+import { PersonReview } from "@/components/person-review";
+import { VisitedDate } from "@/components/visited-date";
 import { CategoryRating } from "@/components/category-rating";
 import { RestaurantMap } from "@/components/restaurant-map";
 import { formatScore } from "@/components/score";
 import { StatusToggle } from "@/components/status-toggle";
 import { requirePerson } from "@/lib/auth";
 import { avatarUrls } from "@/lib/avatars";
-import { formatDate } from "@/lib/format-date";
 import { PEOPLE, PERSON_IDS } from "@/lib/people";
 import { getRestaurant, weightPercent } from "@/lib/restaurants";
 
@@ -52,12 +53,6 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               {[restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ")}
             </p>
           )}
-          {visited && restaurant.visitedOn && (
-            <p className="inline-flex items-center gap-1 text-muted">
-              <Calendar className="size-3.5" />
-              Besucht am {formatDate(restaurant.visitedOn)}
-            </p>
-          )}
           {!visited && <p className="text-muted">Auf der Wunschliste</p>}
         </div>
         <h1 className="font-display text-4xl leading-tight font-semibold text-balance">{restaurant.name}</h1>
@@ -84,7 +79,9 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
                   lat: restaurant.lat!,
                   lng: restaurant.lng!,
                   status: restaurant.status,
-                  score: average !== null ? formatScore(average) : null,
+                  overall: average,
+                  cuisine: restaurant.cuisine,
+                  kind: restaurant.kind,
                   subtitle: null,
                 },
               ]}
@@ -106,6 +103,8 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       {visited ? (
         <section className="space-y-4">
+          <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />
+
           {/* Gesamtnote */}
           <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
             <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white">
@@ -161,6 +160,22 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         </section>
       ) : (
         <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
+      )}
+
+      {visited && (
+        <section className="space-y-3">
+          <h2 className="font-display text-2xl font-semibold">Was wir gegessen haben</h2>
+          {[person, ...PERSON_IDS.filter((p) => p !== person)].map((p) => (
+            <PersonReview
+              key={p}
+              restaurantId={restaurant.id}
+              person={p}
+              review={restaurant.reviews[p]}
+              editable={p === person}
+              avatar={<Avatar person={p} url={avatars[p]} className="size-8 text-xs" />}
+            />
+          ))}
+        </section>
       )}
 
       <section className="space-y-3">
