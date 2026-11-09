@@ -5,7 +5,7 @@ import { isPerson, PERSON_IDS, type Person } from "./people";
 
 export type Scores = Partial<Record<Person, number>>;
 export type Status = "wunsch" | "besucht";
-export type Review = { recommend: boolean; dish: string | null; photoUrl: string | null };
+export type Review = { dish: string | null; photoUrl: string | null };
 export type Reviews = Partial<Record<Person, Review>>;
 export type Category = { id: number; name: string; weight: number; position: number; onSiteOnly: boolean };
 /** categoryId → Person → Note */
@@ -31,12 +31,10 @@ export type RestaurantSummary = {
   scores: Scores;
   /** Gesamtnote des Restaurants: Schnitt der Personen */
   overall: number | null;
-  /** Wer es weiterempfiehlt */
-  recommendedBy: Person[];
 };
 
 /** Reihenfolge, in der die Arten angezeigt werden */
-export const KINDS = ["Frühstück", "Café", "Mittagessen", "Abendessen", "Bar"];
+export const KINDS = ["Frühstück", "Mittagessen", "Abendessen", "Bar"];
 
 export function toStatus(value: unknown): Status {
   return value === "besucht" ? "besucht" : "wunsch";
@@ -122,7 +120,7 @@ function groupReviews(rows: (Review & { restaurantId: number; person: string })[
   for (const row of rows) {
     if (!isPerson(row.person)) continue;
     const entry = byRestaurant.get(row.restaurantId) ?? {};
-    entry[row.person] = { recommend: row.recommend, dish: row.dish, photoUrl: row.photoUrl };
+    entry[row.person] = { dish: row.dish, photoUrl: row.photoUrl };
     byRestaurant.set(row.restaurantId, entry);
   }
   return byRestaurant;
@@ -131,21 +129,18 @@ function groupReviews(rows: (Review & { restaurantId: number; person: string })[
 const reviewColumns = {
   restaurantId: reviews.restaurantId,
   person: reviews.person,
-  recommend: reviews.recommend,
   dish: reviews.dish,
   photoUrl: reviews.photoUrl,
 };
 
 export async function listRestaurants(): Promise<{ restaurants: RestaurantSummary[]; categories: Category[] }> {
   const db = getDb();
-  const [rows, ratingRows, cats, reviewRows] = await Promise.all([
+  const [rows, ratingRows, cats] = await Promise.all([
     db.select().from(restaurants),
     db.select().from(ratings),
     listCategories(),
-    db.select(reviewColumns).from(reviews),
   ]);
   const grouped = groupRatings(ratingRows);
-  const reviewMap = groupReviews(reviewRows);
 
   return {
     categories: cats,
@@ -167,7 +162,6 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
         createdAt: r.createdAt.toISOString(),
         ratings: byCategory,
         ...overallScores(byCategory, cats, r.ordered),
-        recommendedBy: PERSON_IDS.filter((p) => reviewMap.get(r.id)?.[p]?.recommend),
       };
     }),
   };

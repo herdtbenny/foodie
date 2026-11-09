@@ -202,10 +202,10 @@ export async function deleteRestaurant(id: number) {
   refresh();
 }
 
-/** Eigenen Eintrag (Empfehlung, Gericht, Foto) anlegen oder ändern */
+/** Eigenen Eintrag (Gericht, Foto) anlegen oder ändern */
 async function updateReview(
   restaurantId: number,
-  values: Partial<{ recommend: boolean; dish: string | null; photoUrl: string | null }>,
+  values: Partial<{ dish: string | null; photoUrl: string | null }>,
 ) {
   const person = await requirePerson();
   const db = getDb();
@@ -222,10 +222,6 @@ async function updateReview(
     await del(previous.photoUrl).catch(() => {});
   }
   refresh();
-}
-
-export async function setRecommend(restaurantId: number, recommend: boolean) {
-  await updateReview(restaurantId, { recommend });
 }
 
 export async function saveDish(restaurantId: number, dish: string) {

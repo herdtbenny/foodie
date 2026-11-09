@@ -82,7 +82,6 @@ export function RestaurantList({
   );
 
   const [filterType, filterValue] = filter ? [filter.slice(0, filter.indexOf(":")), filter.slice(filter.indexOf(":") + 1)] : ["", ""];
-  const recommendedCount = restaurants.filter((r) => r.recommendedBy.length > 0).length;
   const orderedCount = restaurants.filter((r) => r.ordered).length;
   const needle = q.trim().toLowerCase();
   const shown = restaurants
@@ -92,11 +91,9 @@ export function RestaurantList({
         ? r.kind === filterValue
         : filterType === "kueche"
           ? r.cuisine === filterValue
-          : filterType === "tipp"
-            ? r.recommendedBy.length > 0
-            : filterType === "ort"
-              ? r.ordered === (filterValue === "Bestellt")
-              : true,
+          : filterType === "ort"
+            ? r.ordered === (filterValue === "Bestellt")
+            : true,
     )
     .sort(compare);
 
@@ -134,7 +131,7 @@ export function RestaurantList({
           </select>
         </MenuButton>
 
-        {(kinds.length > 0 || cuisines.length > 0 || recommendedCount > 0) && (
+        {(kinds.length > 0 || cuisines.length > 0 || orderedCount > 0) && (
           <MenuButton label="Filtern" icon={ListFilter} active={!!filter}>
             <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtern" className={nativeSelect}>
               <option value="">Alle anzeigen ({restaurants.length})</option>
@@ -143,9 +140,6 @@ export function RestaurantList({
                   <option value="ort:Vor Ort">Vor Ort ({restaurants.length - orderedCount})</option>
                   <option value="ort:Bestellt">Bestellt ({orderedCount})</option>
                 </optgroup>
-              )}
-              {recommendedCount > 0 && (
-                <option value="tipp:Weiterempfohlen">Weiterempfohlen ({recommendedCount})</option>
               )}
               {kinds.length > 0 && (
                 <optgroup label="Art">

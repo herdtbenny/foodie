@@ -52,7 +52,7 @@ export const ratings = pgTable(
   (t) => [primaryKey({ columns: [t.restaurantId, t.categoryId, t.person] })],
 );
 
-/** Pro Person und Restaurant: Weiterempfehlung, was man gegessen hat, ein Foto */
+/** Pro Person und Restaurant: was man gegessen hat, ein Foto */
 export const reviews = pgTable(
   "reviews",
   {
@@ -60,7 +60,6 @@ export const reviews = pgTable(
       .notNull()
       .references(() => restaurants.id, { onDelete: "cascade" }),
     person: text("person").notNull(),
-    recommend: boolean("recommend").notNull().default(false),
     dish: text("dish"),
     /** Vercel Blob */
     photoUrl: text("photo_url"),

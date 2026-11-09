@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  /* Creme-Weiß als Grund, weiches Schwarz für Text und Buttons, Rot als Akzent */
+  /* Creme-Weiß als Grund, warmes Dunkelgrau für Text und Buttons, Rot als Akzent */
   --paper: #f6f1e7;
   --surface: #fcf9f3;
-  --ink: #1d1b18;
+  --ink: #3a3633;
   --muted: #77706a;
   --line: #e4dccd;
-  --accent: #1d1b18;
+  --accent: #3a3633;
   --accent-ink: #f6f1e7;
   --pop: #d7392b;
   --german: #2f5fb8;
@@ -184,7 +184,7 @@ body {
 
 /* Dunkles Glas für Hauptbuttons und aktive Markierungen */
 .glass-ink {
-  background: rgb(29 27 24 / 0.88);
+  background: rgb(58 54 51 / 0.94);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   color: var(--paper);

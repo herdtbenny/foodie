@@ -96,9 +96,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       {visited ? (
         <section className="space-y-3">
-          <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn}>
-            <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
-          </VisitedDate>
+          <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />
           <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />
 
           {/* Gesamtnote */}

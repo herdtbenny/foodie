@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#f6f1e7"/>
-  <!-- geometrisches "f" -->
-  <path d="M21 52V24a12 12 0 0 1 12-12h7v9h-7a3 3 0 0 0-3 3v28z" fill="#1d1b18"/>
-  <rect x="14" y="27" width="24" height="8" fill="#1d1b18"/>
-  <!-- roter Punkt -->
-  <circle cx="45" cy="47" r="6" fill="#d7392b"/>
-</svg>

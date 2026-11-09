@@ -1,6 +1,6 @@
 "use client";
 
-import { Dices, Navigation, RotateCcw, ThumbsUp } from "lucide-react";
+import { Dices, Navigation, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { kindOrder, type RestaurantSummary } from "@/lib/restaurants";
@@ -15,9 +15,8 @@ const SOURCES: [Source, string][] = [
   ["neu", "Wunschliste"],
 ];
 
-/** Bisherige, die sich lohnen: Gesamtnote ab 7 oder von jemandem empfohlen */
-const isProven = (r: RestaurantSummary) =>
-  r.status === "besucht" && ((r.overall ?? 0) >= 7 || r.recommendedBy.length > 0);
+/** Bisherige, die sich lohnen: Gesamtnote ab 7 */
+const isProven = (r: RestaurantSummary) => r.status === "besucht" && (r.overall ?? 0) >= 7;
 
 /** "Wohin heute?": Art und Lust wählen, die App würfelt ein Restaurant. Darunter die Top 5. */
 export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] }) {
@@ -107,11 +106,6 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
               )}
             </div>
             {pick.address && <p className="text-sm opacity-70">{pick.address}</p>}
-            {pick.recommendedBy.length > 0 && (
-              <p className="inline-flex items-center gap-1.5 text-sm">
-                <ThumbsUp className="size-4" /> Weiterempfohlen
-              </p>
-            )}
             <div className="flex gap-2 pt-1">
               <Link
                 href={`/restaurants/${pick.id}`}

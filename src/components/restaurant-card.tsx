@@ -1,11 +1,11 @@
-import { MapPin, Navigation, ThumbsUp } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
 import type { RestaurantSummary } from "@/lib/restaurants";
 import { CuisineIcon } from "./cuisine-icon";
 import { formatScore, ScorePills } from "./score";
 
-/** Ein Restaurant in der Liste. Ganze Karte führt zur Detailseite, rechts geht's direkt zu Google Maps. */
+/** Ein Restaurant in der Liste. Ganze Karte führt zur Detailseite; rechts die Bewertung (Bisherige) bzw. Route (Wunschliste). */
 export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }) {
   const visited = restaurant.status === "besucht";
   const average = restaurant.overall;
@@ -21,22 +21,12 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <Link
-            href={`/restaurants/${restaurant.id}`}
-            className="min-w-0 truncate font-display text-lg leading-snug font-semibold after:absolute after:inset-0 after:rounded-3xl"
-          >
-            {restaurant.name}
-          </Link>
-          {visited && average !== null && (
-            <span
-              title="Gesamtnote"
-              className="shrink-0 rounded-full bg-pop px-2 py-0.5 text-sm font-semibold text-white tabular-nums"
-            >
-              {formatScore(average)}
-            </span>
-          )}
-        </div>
+        <Link
+          href={`/restaurants/${restaurant.id}`}
+          className="min-w-0 truncate font-display text-lg leading-snug font-semibold after:absolute after:inset-0 after:rounded-3xl"
+        >
+          {restaurant.name}
+        </Link>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
           {tags && <span className="truncate text-[11px] font-semibold tracking-wider uppercase">{tags}</span>}
           {!tags && restaurant.address && <span className="truncate">{restaurant.address}</span>}
@@ -47,33 +37,34 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
             </span>
           )}
         </p>
-        {visited ? (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <ScorePills scores={restaurant.scores} />
-            {restaurant.recommendedBy.length > 0 && (
-              <span
-                title="Weiterempfohlen"
-                className="press inline-flex items-center gap-1 rounded-full bg-pop px-2 py-0.5 text-xs font-semibold text-white"
-              >
-                <ThumbsUp className="size-3" />
-                {restaurant.recommendedBy.length === 2 ? "beide" : ""}
-              </span>
-            )}
-            {restaurant.visitedOn && <span className="text-xs text-muted">{formatDate(restaurant.visitedOn)}</span>}
-          </div>
-        ) : null}
+        {visited && restaurant.visitedOn && (
+          <p className="text-xs text-muted">{formatDate(restaurant.visitedOn)}</p>
+        )}
       </div>
 
-      {restaurant.mapsUrl && (
-        <a
-          href={restaurant.mapsUrl}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`${restaurant.name} in Google Maps öffnen`}
-          className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink"
-        >
-          <Navigation className="size-4" />
-        </a>
+      {/* Alles zur Bewertung gebündelt rechts: Gesamtnote, darunter die Noten von euch beiden */}
+      {visited ? (
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span
+              title="Gesamtnote"
+              className="min-w-11 rounded-full bg-pop px-2.5 py-1 text-center font-display text-lg leading-none font-semibold text-white tabular-nums"
+            >
+              {average !== null ? formatScore(average) : "–"}
+            </span>
+          <ScorePills scores={restaurant.scores} />
+        </div>
+      ) : (
+        restaurant.mapsUrl && (
+          <a
+            href={restaurant.mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${restaurant.name} in Google Maps öffnen`}
+            className="press relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-muted hover:text-ink"
+          >
+            <Navigation className="size-4" />
+          </a>
+        )
       )}
     </div>
   );
