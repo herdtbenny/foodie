@@ -50,9 +50,9 @@ export function CategoryRating({
   }
 
   return (
-    <div className={`space-y-2.5 ${disabled ? "opacity-35" : ""}`} aria-disabled={disabled}>
+    <div className={`space-y-1.5 ${disabled ? "opacity-35" : ""}`} aria-disabled={disabled}>
       <div className="flex items-baseline gap-2">
-        <h3 className="font-display text-xl font-semibold">{name}</h3>
+        <h3 className="font-display text-base font-semibold">{name}</h3>
         <span className="text-xs text-muted tabular-nums">{disabled ? "zählt nicht (bestellt)" : `${percent} %`}</span>
         {pending && <LoaderCircle className="size-3.5 animate-spin self-center text-muted" />}
         <div className="ml-auto flex gap-1.5">

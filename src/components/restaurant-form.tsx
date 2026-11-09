@@ -1,69 +1,35 @@
 "use client";
 
-import { Heart, ClipboardPaste, LoaderCircle, MapPin, MapPinOff, History } from "lucide-react";
+import { ClipboardPaste, Heart, History, LoaderCircle, MapPin, MapPinOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 import { lookupMapsLink, saveRestaurant } from "@/lib/actions";
 import { todayBerlin } from "@/lib/format-date";
 import type { Status } from "@/lib/restaurants";
 import { SAVE_FAILED, toast } from "@/lib/toast";
+import { SelectChip } from "./restaurant-info";
 import { RestaurantMap } from "./restaurant-map";
 import { Segmented } from "./segmented";
-
-type ExistingRestaurant = {
-  id: number;
-  name: string;
-  cuisine: string | null;
-  address: string | null;
-  mapsUrl: string | null;
-  lat: number | null;
-  lng: number | null;
-  status: Status;
-  visitedOn: string | null;
-  notes: string | null;
-};
-
-const inputClass =
-  "w-full rounded-2xl border border-line bg-surface px-4 py-3 outline-none placeholder:text-muted/70 focus:border-ink";
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 flex items-baseline justify-between gap-2 px-2 text-sm font-medium">
-        {label}
-        {hint && <span className="text-xs font-normal text-muted">{hint}</span>}
-      </span>
-      {children}
-    </label>
-  );
-}
 
 type Coords = { lat: number; lng: number } | null;
 type LinkState = "idle" | "loading" | "found" | "nocoords" | "invalid";
 
-export function RestaurantForm({
-  restaurant,
-  cuisines,
-  defaultStatus = "wunsch",
-}: {
-  restaurant?: ExistingRestaurant;
-  cuisines: string[];
-  defaultStatus?: Status;
-}) {
+/**
+ * Neues Restaurant – bewusst knapp: Link einfügen, Name prüfen, fertig.
+ * Bewertung, Datum, Fotos usw. kommen danach direkt auf der Restaurant-Seite.
+ */
+export function RestaurantForm({ cuisines, defaultStatus = "wunsch" }: { cuisines: string[]; defaultStatus?: Status }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [mapsUrl, setMapsUrl] = useState(restaurant?.mapsUrl ?? "");
-  const [name, setName] = useState(restaurant?.name ?? "");
-  const [address, setAddress] = useState(restaurant?.address ?? "");
-  const [ordered, setOrderedState] = useState(false);
-  const [status, setStatus] = useState<Status>(restaurant?.status ?? defaultStatus);
-  const [coords, setCoords] = useState<Coords>(
-    restaurant?.lat != null && restaurant.lng != null ? { lat: restaurant.lat, lng: restaurant.lng } : null,
-  );
+  const [mapsUrl, setMapsUrl] = useState("");
+  const [name, setName] = useState("");
+  const [cuisine, setCuisine] = useState("");
+  const [status, setStatus] = useState<Status>(defaultStatus);
+  const [coords, setCoords] = useState<Coords>(null);
   const [linkState, setLinkState] = useState<LinkState>("idle");
-  const lastLookup = useRef(restaurant?.mapsUrl ?? "");
+  const lastLookup = useRef("");
 
   async function lookup(value: string) {
     const input = value.trim();
@@ -80,7 +46,6 @@ export function RestaurantForm({
       setMapsUrl(info.mapsUrl);
       lastLookup.current = info.mapsUrl;
       if (info.name) setName((current) => current || info.name!);
-      setAddress(info.address ?? "");
       if (info.lat != null && info.lng != null) {
         setCoords({ lat: info.lat, lng: info.lng });
         setLinkState("found");
@@ -115,7 +80,7 @@ export function RestaurantForm({
           setError(result.error);
           return;
         }
-        toast(restaurant ? "Gespeichert" : `„${name}“ eingetragen`);
+        toast(`„${name}“ eingetragen`);
         router.push(`/restaurants/${result.id}`);
       } catch {
         setError(SAVE_FAILED);
@@ -124,154 +89,84 @@ export function RestaurantForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5">
-      {restaurant && <input type="hidden" name="id" value={restaurant.id} />}
+    <form onSubmit={submit} className="space-y-4">
       <input type="hidden" name="lat" value={coords?.lat ?? ""} />
       <input type="hidden" name="lng" value={coords?.lng ?? ""} />
       <input type="hidden" name="status" value={status} />
-      <input type="hidden" name="address" value={address} />
-      <input type="hidden" name="ordered" value={ordered ? "1" : ""} />
+      <input type="hidden" name="cuisine" value={cuisine} />
+      {status === "besucht" && <input type="hidden" name="visitedOn" value={todayBerlin()} />}
 
-      {/* Google-Maps-Link zuerst – füllt den Rest aus */}
-      <div className="space-y-2 card rounded-3xl p-4">
-        <Field label="Google-Maps-Link" hint="Teilen → Link kopieren">
-          <div className="flex gap-2">
-            <input
-              name="mapsUrl"
-              type="text"
-              inputMode="url"
-              autoComplete="off"
-              value={mapsUrl}
-              onChange={(e) => setMapsUrl(e.target.value)}
-              onPaste={(e) => lookup(e.clipboardData.getData("text"))}
-              onBlur={(e) => lookup(e.target.value)}
-              placeholder="https://maps.app.goo.gl/…"
-              className={`${inputClass} min-w-0 flex-1 bg-paper`}
-            />
-            <button
-              type="button"
-              onClick={pasteFromClipboard}
-              aria-label="Link aus der Zwischenablage einfügen"
-              className="press flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-4 text-sm font-medium text-paper"
-            >
-              <ClipboardPaste className="size-4" />
-              <span className="hidden sm:inline">Einfügen</span>
-            </button>
-          </div>
-        </Field>
-        <p className="flex min-h-5 items-center gap-1.5 text-xs text-muted" aria-live="polite">
-          {linkState === "loading" && (
-            <>
-              <LoaderCircle className="size-3.5 animate-spin" /> Link wird gelesen …
-            </>
-          )}
-          {linkState === "found" && (
-            <>
-              <MapPin className="size-3.5 text-german" /> Position gefunden
-            </>
-          )}
-          {linkState === "nocoords" && (
-            <>
-              <MapPinOff className="size-3.5" /> Keine Position im Link – wird beim Speichern gesucht
-            </>
-          )}
-          {linkState === "invalid" && <>Das sieht nicht nach einem Google-Maps-Link aus.</>}
-          {linkState === "idle" &&
-            (coords ? (
-              <>
-                <MapPin className="size-3.5 text-german" /> Position gespeichert
-              </>
-            ) : (
-              <>In Google Maps: Teilen → Link kopieren, hier einfügen.</>
-            ))}
-        </p>
+      {/* Google-Maps-Link mit Vorschau */}
+      <div className="card divide-y divide-line overflow-hidden rounded-3xl">
         {coords && (
           <RestaurantMap
             interactive={false}
-            zoom={16}
-            className="h-32 rounded-2xl"
-            points={[{ id: 0, name: name || "Hier", ...coords, status, overall: null, cuisine: null, subtitle: null }]}
+            zoom={14}
+            className="h-40"
+            points={[
+              { id: 0, name: name || "Hier", ...coords, status, overall: null, cuisine: cuisine || null, subtitle: null },
+            ]}
           />
         )}
-      </div>
-
-      <Field label="Name">
-        <input
-          name="name"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="z. B. Trattoria Da Mario"
-          className={inputClass}
-        />
-      </Field>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Küche" hint="optional">
+        <div className="flex items-center gap-2 py-1 pr-1 pl-4">
+          {linkState === "loading" ? (
+            <LoaderCircle className="size-4 shrink-0 animate-spin text-muted" />
+          ) : linkState === "nocoords" || linkState === "invalid" ? (
+            <MapPinOff className="size-4 shrink-0 text-muted" />
+          ) : (
+            <MapPin className={`size-4 shrink-0 ${linkState === "found" ? "text-pop" : "text-muted"}`} />
+          )}
           <input
-            name="cuisine"
-            list="cuisines"
-            defaultValue={restaurant?.cuisine ?? ""}
-            placeholder="z. B. Italienisch"
-            className={inputClass}
+            name="mapsUrl"
+            type="text"
+            inputMode="url"
+            autoComplete="off"
+            value={mapsUrl}
+            onChange={(e) => setMapsUrl(e.target.value)}
+            onPaste={(e) => lookup(e.clipboardData.getData("text"))}
+            onBlur={(e) => lookup(e.target.value)}
+            placeholder="Google-Maps-Link"
+            aria-label="Google-Maps-Link"
+            className="min-w-0 flex-1 truncate bg-transparent py-2.5 outline-none placeholder:text-muted/70"
           />
-          <datalist id="cuisines">
-            {cuisines.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
-        </Field>
+          <button
+            type="button"
+            onClick={pasteFromClipboard}
+            className="press inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-paper"
+          >
+            <ClipboardPaste className="size-4" />
+            Einfügen
+          </button>
+        </div>
       </div>
-
-      <fieldset>
-        <legend className="mb-1.5 px-2 text-sm font-medium">Status</legend>
-        <Segmented
-          label="Status"
-          value={status}
-          onChange={setStatus}
-          options={[
-            { value: "wunsch", label: "Wunschliste", icon: Heart },
-            { value: "besucht", label: "Waren wir schon", icon: History },
-          ]}
-        />
-      </fieldset>
-
-      {status === "besucht" && (
-        <Segmented
-          label="Vor Ort oder bestellt"
-          value={ordered}
-          onChange={setOrderedState}
-          options={[
-            { value: false, label: "Vor Ort" },
-            { value: true, label: "Bestellt" },
-          ]}
-        />
+      {linkState === "invalid" && (
+        <p className="px-2 text-sm text-pop">Das sieht nicht nach einem Google-Maps-Link aus.</p>
       )}
 
-      {status === "besucht" && (
-        <Field label="Zuletzt besucht" hint="optional">
-          <input
-            name="visitedOn"
-            type="date"
-            max={todayBerlin()}
-            defaultValue={restaurant?.visitedOn ?? todayBerlin()}
-            className={`${inputClass} appearance-none`}
-          />
-        </Field>
-      )}
+      <input
+        name="name"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name"
+        aria-label="Name"
+        className="glass w-full rounded-full px-5 py-3 font-display text-lg font-semibold outline-none placeholder:font-sans placeholder:text-base placeholder:font-normal placeholder:text-muted/70"
+      />
 
-      <Field label="Notizen" hint="optional">
-        <textarea
-          name="notes"
-          rows={3}
-          defaultValue={restaurant?.notes ?? ""}
-          placeholder="z. B. „Von Anna empfohlen“ oder „Unbedingt reservieren“"
-          className={`${inputClass} min-h-[5rem] resize-none [field-sizing:content]`}
-        />
-      </Field>
+      <SelectChip label="Küche" value={cuisine} options={cuisines} allowNew onChange={setCuisine} />
+
+      <Segmented
+        label="Status"
+        value={status}
+        onChange={setStatus}
+        options={[
+          { value: "wunsch", label: "Wunschliste", icon: Heart },
+          { value: "besucht", label: "Wir waren da", icon: History },
+        ]}
+      />
 
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="px-2 text-sm text-pop">
           {error}
         </p>
       )}
@@ -279,10 +174,10 @@ export function RestaurantForm({
       <button
         type="submit"
         disabled={pending || linkState === "loading"}
-        className="press flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink disabled:opacity-60"
+        className="press flex w-full items-center justify-center gap-2 rounded-full bg-pop px-5 py-3.5 font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_10px_24px_-10px_rgb(215_57_43/0.7)] disabled:opacity-60"
       >
         {pending && <LoaderCircle className="size-5 animate-spin" />}
-        {pending ? "Speichern …" : restaurant ? "Speichern" : status === "besucht" ? "Eintragen & bewerten" : "Auf die Wunschliste"}
+        {pending ? "Speichern …" : "Eintragen"}
       </button>
     </form>
   );

@@ -5,11 +5,13 @@ import { and, eq, max } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { logActivity, markSeen, unreadFor } from "./activity";
 import { requirePerson } from "./auth";
 import { getDb } from "./db";
-import { categories, ratings, restaurants, reviews } from "./db/schema";
+import { categories, pushSubscriptions, ratings, restaurants, reviews } from "./db/schema";
 import { todayBerlin } from "./format-date";
-import { geocodeFirst, lookupMaps, type MapsInfo } from "./maps";
+import { lookupMaps, type MapsInfo } from "./maps";
+import { pushToPerson } from "./push";
 import { isPerson } from "./people";
 import { AUTH_COOKIE, PERSON_COOKIE, signAuth, verifyAuth } from "./session";
 import { toStatus, type Status } from "./restaurants";
@@ -90,7 +92,6 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
 
   const status = toStatus(text(formData, "status"));
   const mapsUrl = optionalText(formData, "mapsUrl");
-  const address = optionalText(formData, "address");
   let lat = optionalNumber(formData, "lat");
   let lng = optionalNumber(formData, "lng");
 
@@ -100,7 +101,7 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
     const hit =
       fromLink?.lat != null && fromLink.lng != null
         ? { lat: fromLink.lat, lng: fromLink.lng }
-        : await geocodeFirst([[name, address], [address]]);
+        : null;
     lat = hit?.lat ?? null;
     lng = hit?.lng ?? null;
   }
@@ -108,7 +109,6 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
   const values = {
     name,
     cuisine: optionalText(formData, "cuisine"),
-    address,
     mapsUrl,
     lat,
     lng,
@@ -133,6 +133,7 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
     .insert(restaurants)
     .values({ ...values, createdBy: person })
     .returning({ id: restaurants.id });
+  await logActivity(person, "created", created.id, { name, status });
   refresh();
   return { id: created.id };
 }
@@ -140,13 +141,12 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
 export type RestaurantPatch = Partial<{
   name: string;
   cuisine: string | null;
-  address: string | null;
   mapsUrl: string | null;
 }>;
 
 /**
  * Einzelne Felder direkt auf der Detailseite ändern.
- * Neuer Maps-Link oder neue Adresse → Position wird neu gesucht.
+ * Neuer Maps-Link → Position wird daraus gelesen (oder über den Text im Link gesucht).
  */
 export async function updateRestaurant(id: number, patch: RestaurantPatch) {
   await requirePerson();
@@ -162,7 +162,6 @@ export async function updateRestaurant(id: number, patch: RestaurantPatch) {
     values.name = name;
   }
   if ("cuisine" in patch) values.cuisine = clean(patch.cuisine);
-  if ("address" in patch) values.address = clean(patch.address);
   if ("mapsUrl" in patch) values.mapsUrl = clean(patch.mapsUrl);
 
   if ("mapsUrl" in patch && values.mapsUrl) {
@@ -173,20 +172,12 @@ export async function updateRestaurant(id: number, patch: RestaurantPatch) {
         values.lat = info.lat;
         values.lng = info.lng;
       }
-      if (info.address) values.address = info.address;
-    }
-  } else if ("address" in patch && values.address && !current.mapsUrl) {
-    // Ohne Maps-Link: Position aus der Adresse
-    const hit = await geocodeFirst([[current.name, values.address], [values.address]]);
-    if (hit) {
-      values.lat = hit.lat;
-      values.lng = hit.lng;
     }
   }
 
   await db.update(restaurants).set(values).where(eq(restaurants.id, id));
   refresh();
-  return { lat: values.lat ?? current.lat, lng: values.lng ?? current.lng, address: values.address ?? current.address };
+  return { lat: values.lat ?? current.lat, lng: values.lng ?? current.lng };
 }
 
 export async function deleteRestaurant(id: number) {
@@ -222,7 +213,9 @@ async function updateReview(
 }
 
 export async function saveDish(restaurantId: number, dish: string) {
-  await updateReview(restaurantId, { dish: dish.trim().slice(0, 2000) || null });
+  const value = dish.trim().slice(0, 2000) || null;
+  await updateReview(restaurantId, { dish: value });
+  if (value) await logActivity(await requirePerson(), "dish", restaurantId, { dish: value });
 }
 
 /** Eigenes Foto hochladen (kommt bereits verkleinert aus dem Browser) */
@@ -236,6 +229,7 @@ export async function uploadPhoto(restaurantId: number, formData: FormData) {
     contentType: file.type,
   });
   await updateReview(restaurantId, { photoUrl: blob.url });
+  await logActivity(person, "photo", restaurantId, {});
 }
 
 export async function removePhoto(restaurantId: number) {
@@ -269,6 +263,11 @@ export async function rateRestaurant(restaurantId: number, categoryId: number, s
         target: [ratings.restaurantId, ratings.categoryId, ratings.person],
         set: { score, updatedAt: new Date() },
       });
+    const [category] = await db
+      .select({ name: categories.name })
+      .from(categories)
+      .where(eq(categories.id, categoryId));
+    await logActivity(person, "rated", restaurantId, { category: category?.name ?? "Note", score });
   }
   refresh();
 }
@@ -328,7 +327,7 @@ export async function deleteCategory(id: number) {
 
 /** Zwischen Wunschliste und "Waren wir schon" wechseln. */
 export async function setStatus(restaurantId: number, status: Status) {
-  await requirePerson();
+  const person = await requirePerson();
   const db = getDb();
   const [current] = await db
     .select({ visitedOn: restaurants.visitedOn })
@@ -343,6 +342,7 @@ export async function setStatus(restaurantId: number, status: Status) {
         : { status, visitedOn: null },
     )
     .where(eq(restaurants.id, restaurantId));
+  if (status === "besucht") await logActivity(person, "visited", restaurantId, {});
   refresh();
 }
 
@@ -356,4 +356,38 @@ export async function saveNotes(restaurantId: number, notes: string) {
     .returning({ id: restaurants.id });
   if (!updated) throw new Error("Restaurant nicht gefunden");
   refresh();
+}
+
+/** Für das Live-Popup: neue Aktivitäten der anderen Person seit `afterId`. */
+export async function fetchNewActivity(afterId: number) {
+  const person = await requirePerson();
+  return unreadFor(person, afterId);
+}
+
+export async function markActivitySeen(uptoId: number) {
+  const person = await requirePerson();
+  if (Number.isInteger(uptoId) && uptoId > 0) await markSeen(person, uptoId);
+}
+
+type PushSubscriptionInput = { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
+
+/** Push-Abo dieses Geräts speichern (für die eingeloggte Person). */
+export async function savePushSubscription(subscription: PushSubscriptionInput) {
+  const person = await requirePerson();
+  const { endpoint, keys } = subscription;
+  if (!endpoint?.startsWith("https://") || !keys?.p256dh || !keys.auth) throw new Error("Ungültiges Push-Abo");
+  await getDb()
+    .insert(pushSubscriptions)
+    .values({ endpoint, person, p256dh: keys.p256dh, auth: keys.auth })
+    .onConflictDoUpdate({ target: pushSubscriptions.endpoint, set: { person, p256dh: keys.p256dh, auth: keys.auth } });
+}
+
+export async function removePushSubscription(endpoint: string) {
+  await requirePerson();
+  await getDb().delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
+}
+
+export async function sendTestPush() {
+  const person = await requirePerson();
+  await pushToPerson(person, { title: "foodie.", body: "Push-Benachrichtigungen funktionieren.", url: "/aktivitaet" });
 }

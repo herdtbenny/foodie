@@ -15,7 +15,6 @@ export type RestaurantSummary = {
   id: number;
   name: string;
   cuisine: string | null;
-  address: string | null;
   mapsUrl: string | null;
   lat: number | null;
   lng: number | null;
@@ -146,7 +145,6 @@ export async function listRestaurants(): Promise<{ restaurants: RestaurantSummar
         id: r.id,
         name: r.name,
         cuisine: r.cuisine,
-        address: r.address,
         mapsUrl: r.mapsUrl,
         lat: r.lat,
         lng: r.lng,

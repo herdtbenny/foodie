@@ -78,7 +78,7 @@ export function RestaurantList({
   const orderedCount = restaurants.filter((r) => r.ordered).length;
   const needle = q.trim().toLowerCase();
   const shown = restaurants
-    .filter((r) => !needle || `${r.name}\n${r.cuisine ?? ""}\n${r.address ?? ""}`.toLowerCase().includes(needle))
+    .filter((r) => !needle || `${r.name}\n${r.cuisine ?? ""}`.toLowerCase().includes(needle))
     .filter((r) =>
       filterType === "kueche"
           ? r.cuisine === filterValue
@@ -96,7 +96,7 @@ export function RestaurantList({
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Suchen: Name, Küche, Ort …"
+          placeholder="Suchen: Name oder Küche …"
           aria-label="Suchen"
           className="min-w-0 flex-1 bg-transparent py-1.5 pl-1.5 outline-none placeholder:text-muted/70 [&::-webkit-search-cancel-button]:hidden"
         />

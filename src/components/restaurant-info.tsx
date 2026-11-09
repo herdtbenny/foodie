@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronDown, ExternalLink, LoaderCircle } from "lucide-react";
+import { ChevronDown, ExternalLink, LoaderCircle, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { Children, useState, useTransition } from "react";
 import { updateRestaurant, type RestaurantPatch } from "@/lib/actions";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 
@@ -60,18 +60,23 @@ export function EditableTitle({ id, name }: { id: number; name: string }) {
 const NEW = "__neu";
 
 /** Ein Chip mit unsichtbarem nativem <select> darüber – öffnet auf dem iPhone das System-Menü */
-function SelectChip({
+export function SelectChip({
   label,
   value,
   options,
   onChange,
   allowNew,
+  pending,
+  emptyLabel,
 }: {
   label: string;
   value: string;
   options: string[];
   onChange: (value: string) => void;
   allowNew?: boolean;
+  pending?: boolean;
+  /** Text für "nichts gewählt" im Menü, z. B. "Alle Küchen" */
+  emptyLabel?: string;
 }) {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
@@ -95,21 +100,25 @@ function SelectChip({
             setAdding(false);
           }
         }}
-        placeholder={`Neue ${label}`}
+        placeholder={`Neue ${label}, z. B. Vietnamesisch`}
         aria-label={`Neue ${label}`}
-        className="glass w-40 rounded-full px-3.5 py-1.5 text-sm outline-none"
+        className="glass w-full min-w-0 rounded-full px-3.5 py-3.5 text-sm outline-none"
       />
     );
   }
 
   return (
     <span
-      className={`press glass relative inline-flex items-center gap-1 rounded-full py-1.5 pr-2.5 pl-3.5 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
+      className={`press glass relative flex w-full min-w-0 items-center justify-center gap-1 rounded-full py-3.5 pr-2.5 pl-3 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
         value ? "text-ink" : "text-muted"
       }`}
     >
-      {value || label}
-      <ChevronDown className="size-3.5 opacity-60" />
+      <span className="min-w-0 truncate">{value || emptyLabel || label}</span>
+      {pending ? (
+        <LoaderCircle className="size-3.5 shrink-0 animate-spin opacity-60" />
+      ) : (
+        <ChevronDown className="size-3.5 shrink-0 opacity-60" />
+      )}
       <select
         value={value}
         onChange={(e) => {
@@ -119,99 +128,108 @@ function SelectChip({
         aria-label={label}
         className="absolute inset-0 size-full cursor-pointer appearance-none rounded-full opacity-0"
       >
-        <option value="">Keine {label}</option>
+        {/* "Neu" ganz oben, damit man es nicht übersieht */}
+        {allowNew && <option value={NEW}>＋ Neue {label} hinzufügen …</option>}
+        <option value="">{emptyLabel ?? `Keine ${label}`}</option>
         {list.map((o) => (
           <option key={o} value={o}>
             {o}
           </option>
         ))}
-        {allowNew && <option value={NEW}>Neue {label} …</option>}
       </select>
     </span>
   );
 }
 
-/** Direkt unter dem Namen: Chip für die Küche */
-export function MetaChips({ id, cuisine, cuisines }: { id: number; cuisine: string | null; cuisines: string[] }) {
+/** Chip-Zeile unter der Karte: Küche, dahinter weitere Chips (Datum, Vor Ort/Bestellt) */
+export function MetaChips({
+  id,
+  cuisine,
+  cuisines,
+  children,
+}: {
+  id: number;
+  cuisine: string | null;
+  cuisines: string[];
+  children?: React.ReactNode;
+}) {
   const { pending, save } = useSave(id);
   const [current, setCurrent] = useState(cuisine ?? "");
+  // Gleich breite Spalten über die ganze Zeile
+  const columns = 1 + Children.toArray(children).length;
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="grid items-center gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
       <SelectChip
         label="Küche"
         value={current}
         options={cuisines}
         allowNew
+        pending={pending}
         onChange={(v) => {
           setCurrent(v);
           save({ cuisine: v || null }, v ? `Küche: ${v}` : "Küche entfernt", () => setCurrent(cuisine ?? ""));
         }}
       />
-      {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}
+      {children}
     </div>
   );
 }
 
-const fieldClass =
-  "min-w-0 flex-1 bg-transparent py-3 text-right outline-none placeholder:text-muted/60 focus:text-left";
 
 /** Google-Maps-Link – Position und Adresse kommen daraus */
-export function RestaurantInfo({ id, mapsUrl }: { id: number; mapsUrl: string | null }) {
+/**
+ * Schmale Zeile unter der Karte: Google-Maps-Link direkt bearbeiten, daneben Öffnen.
+ * Neuer Link → Position wird daraus gelesen.
+ */
+export function MapsLinkRow({ id, mapsUrl }: { id: number; mapsUrl: string | null }) {
   const { pending, save } = useSave(id);
-  const [values, setValues] = useState({ mapsUrl: mapsUrl ?? "" });
-  const saved = { mapsUrl: mapsUrl ?? "" };
+  const [value, setValue] = useState(mapsUrl ?? "");
+  const saved = mapsUrl ?? "";
 
-  function commit(key: "mapsUrl", raw?: string) {
-    const next = (raw ?? values[key]).trim();
-    if (next === saved[key]) return;
-    const labels = { mapsUrl: "Google-Maps-Link" };
-    save({ [key]: next || null }, `${labels[key]} gespeichert`, () => setValues((v) => ({ ...v, [key]: saved[key] })));
+  function commit(raw?: string) {
+    const next = (raw ?? value).trim();
+    if (next === saved) return;
+    save({ mapsUrl: next || null }, next ? "Google-Maps-Link gespeichert" : "Link entfernt", () => setValue(saved));
   }
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2 px-2">
-        <h2 className="font-display text-2xl font-semibold">Google Maps</h2>
-        {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}
-      </div>
-
-
-      <div className="divide-y divide-line card rounded-3xl">
-        <div className="flex items-center gap-3 px-4">
-          <label className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="w-12 shrink-0 text-sm text-muted">Link</span>
-            <input
-              type="text"
-              inputMode="url"
-              autoComplete="off"
-              value={values.mapsUrl}
-              onChange={(e) => setValues((v) => ({ ...v, mapsUrl: e.target.value }))}
-              onPaste={(e) => {
-                const pasted = e.clipboardData.getData("text");
-                e.preventDefault();
-                setValues((v) => ({ ...v, mapsUrl: pasted }));
-                commit("mapsUrl", pasted);
-              }}
-              onBlur={() => commit("mapsUrl")}
-              onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-              placeholder="Google-Maps-Link einfügen"
-              className={`${fieldClass} truncate`}
-            />
-          </label>
-          {saved.mapsUrl && (
-            <a
-              href={saved.mapsUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="In Google Maps öffnen"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted hover:text-ink"
-            >
-              <ExternalLink className="size-4" />
-            </a>
-          )}
-        </div>
-      </div>
-    </section>
+    <div className="flex items-center gap-2 py-1 pr-1 pl-4">
+      {pending ? (
+        <LoaderCircle className="size-4 shrink-0 animate-spin text-muted" />
+      ) : (
+        <MapPin className="size-4 shrink-0 text-muted" />
+      )}
+      <input
+        type="text"
+        inputMode="url"
+        autoComplete="off"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onPaste={(e) => {
+          const pasted = e.clipboardData.getData("text");
+          e.preventDefault();
+          setValue(pasted);
+          commit(pasted);
+        }}
+        onBlur={() => commit()}
+        onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+        placeholder="Google-Maps-Link einfügen"
+        aria-label="Google-Maps-Link"
+        className="min-w-0 flex-1 truncate bg-transparent py-2 text-sm text-muted outline-none placeholder:text-muted/60 focus:text-ink"
+      />
+      {saved && (
+        <a
+          href={saved}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="In Google Maps öffnen"
+          className="press inline-flex shrink-0 items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-paper"
+        >
+          Öffnen
+          <ExternalLink className="size-3.5" />
+        </a>
+      )}
+    </div>
   );
 }

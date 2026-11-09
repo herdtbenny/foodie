@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { RestaurantSummary } from "@/lib/restaurants";
 import { formatScore, ScorePills } from "./score";
+import { SelectChip } from "./restaurant-info";
 import { Segmented } from "./segmented";
 
 type Source = "egal" | "neu" | "bewaehrt";
@@ -47,26 +48,19 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
     setRolled(true);
   }
 
-  const chip = (selected: boolean) =>
-    `shrink-0 rounded-full border px-3.5 py-2 text-sm transition-colors ${
-      selected ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted"
-    }`;
 
   return (
     <div className="space-y-6">
       <h1 className="px-2 font-display text-4xl font-semibold">Wohin heute?</h1>
 
       <div className="space-y-3">
-        <div className="no-scrollbar -mx-2 flex gap-1.5 overflow-x-auto px-2 sm:-mx-4 sm:px-4">
-          <button type="button" onClick={() => setCuisine("")} className={chip(!cuisine)}>
-            Alles
-          </button>
-          {cuisines.map((k) => (
-            <button key={k} type="button" onClick={() => setCuisine(cuisine === k ? "" : k)} className={chip(cuisine === k)}>
-              {k}
-            </button>
-          ))}
-        </div>
+        <SelectChip
+          label="Küche"
+          emptyLabel="Alle Küchen"
+          value={cuisine}
+          options={cuisines}
+          onChange={setCuisine}
+        />
         <Segmented
           label="Woraus würfeln"
           value={source}
@@ -104,7 +98,6 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
                 </span>
               )}
             </div>
-            {pick.address && <p className="text-sm opacity-70">{pick.address}</p>}
             <div className="flex gap-2 pt-1">
               <Link
                 href={`/restaurants/${pick.id}`}

@@ -1,11 +1,11 @@
-import { boolean, date, doublePrecision, integer, pgTable, primaryKey, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, date, doublePrecision, integer, jsonb, pgTable, primaryKey, serial, text, timestamp } from "drizzle-orm/pg-core";
+import type { ActivityMeta } from "../activity-format";
 
 export const restaurants = pgTable("restaurants", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   /** Küche, z. B. "Italienisch", "Sushi", "Frühstück", "Bar" */
   cuisine: text("cuisine"),
-  address: text("address"),
   mapsUrl: text("maps_url"),
   /** Aus dem Google-Maps-Link gelesen (oder per Adresse gesucht) */
   lat: doublePrecision("lat"),
@@ -65,3 +65,29 @@ export const reviews = pgTable(
   },
   (t) => [primaryKey({ columns: [t.restaurantId, t.person] })],
 );
+
+/** Was German oder Evelyne gemacht hat – für Benachrichtigungen und den Rückblick */
+export const activities = pgTable("activities", {
+  id: serial("id").primaryKey(),
+  actor: text("actor").notNull(),
+  type: text("type").notNull(),
+  restaurantId: integer("restaurant_id").references(() => restaurants.id, { onDelete: "set null" }),
+  /** Name wird mitgespeichert, damit der Eintrag auch nach dem Löschen lesbar bleibt */
+  meta: jsonb("meta").$type<ActivityMeta>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Bis zu welcher Aktivität jemand alles gesehen hat */
+export const activityReads = pgTable("activity_reads", {
+  person: text("person").primaryKey(),
+  lastSeenId: integer("last_seen_id").notNull().default(0),
+});
+
+/** Push-Abos pro Gerät (ein Endpoint = ein Browser/Homescreen-App) */
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  endpoint: text("endpoint").primaryKey(),
+  person: text("person").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

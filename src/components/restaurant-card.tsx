@@ -1,4 +1,4 @@
-import { CalendarDays, MapPin, Navigation } from "lucide-react";
+import { CalendarDays, MapPin } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
 import type { RestaurantSummary } from "@/lib/restaurants";
@@ -29,8 +29,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
         </Link>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
           {tags && <span className="truncate text-[11px] font-semibold tracking-wider uppercase">{tags}</span>}
-          {!tags && restaurant.address && <span className="truncate">{restaurant.address}</span>}
-          {!tags && !restaurant.address && restaurant.lat === null && (
+          {!tags && restaurant.lat === null && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3" />
               ohne Position
@@ -65,7 +64,8 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
             aria-label={`${restaurant.name} in Google Maps öffnen`}
             className="press relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-muted hover:text-ink"
           >
-            <Navigation className="size-4" />
+            {/* Roter Pin wie in Google Maps (kein Logo) */}
+            <MapPin className="size-5 fill-pop text-surface" strokeWidth={1.75} />
           </a>
         )
       )}

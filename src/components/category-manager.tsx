@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, LoaderCircle, Minus, Plus, Trash } from "lucide-react";
+import { Check, LoaderCircle, Minus, Plus, Store, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { addCategory, deleteCategory, renameCategory, setCategoryOnSiteOnly, setCategoryWeight } from "@/lib/actions";
@@ -141,49 +141,45 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
               </button>
             </div>
             {cat.weight === 0 && <p className="text-center text-xs text-muted">Zählt nicht zur Gesamtnote.</p>}
-            <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
-              <span className="text-muted">Nur vor Ort (bei Bestellung ausgegraut)</span>
-              <input
-                type="checkbox"
-                checked={cat.onSiteOnly}
-                onChange={() => toggleOnSite(cat)}
-                className="peer sr-only"
-              />
-              <span
-                aria-hidden
-                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-ink ${
-                  cat.onSiteOnly ? "bg-ink" : "bg-line"
+            {/* Chip: zählt diese Kategorie nur, wenn man vor Ort war? */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => toggleOnSite(cat)}
+                aria-pressed={cat.onSiteOnly}
+                title="Bei Bestellungen wird diese Kategorie ausgegraut"
+                className={`press inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium ${
+                  cat.onSiteOnly ? "glass-ink" : "glass text-muted"
                 }`}
               >
-                <span
-                  className={`absolute top-1 size-5 rounded-full bg-paper shadow transition-[left] ${
-                    cat.onSiteOnly ? "left-6" : "left-1"
-                  }`}
-                />
-              </span>
-            </label>
+                <Store className="size-4" />
+                {cat.onSiteOnly ? "Nur vor Ort" : "Auch bei Bestellung"}
+              </button>
+            </div>
           </li>
         ))}
       </ul>
 
       <div className="flex gap-2">
+      <div className="glass flex items-center gap-1 rounded-full p-1 pl-5">
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
-          placeholder="Neue Kategorie, z. B. Service"
+          placeholder="Neue Kategorie"
           aria-label="Neue Kategorie"
-          className="min-w-0 flex-1 rounded-full border border-line bg-surface px-5 py-3 outline-none placeholder:text-muted/70 focus:border-ink"
+          className="min-w-0 flex-1 bg-transparent py-2 outline-none placeholder:text-muted/70"
         />
         <button
           type="button"
           onClick={add}
           disabled={pending || !newName.trim()}
-          className="press flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-5 font-semibold text-paper disabled:opacity-50"
+          className="press flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-paper disabled:opacity-40"
         >
           {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Plus className="size-4" />}
           Hinzufügen
         </button>
+      </div>
       </div>
     </div>
   );

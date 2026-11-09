@@ -1,9 +1,9 @@
 "use client";
 
-import { CalendarDays, ChevronDown, LoaderCircle } from "lucide-react";
+import { CalendarDays, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { setVisitedOn } from "@/lib/actions";
-import { formatDate, todayBerlin } from "@/lib/format-date";
+import { formatDate, formatDateShort, todayBerlin } from "@/lib/format-date";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 
 /** Datum-Chip: zeigt das Datum, Antippen öffnet ein kleines Popup mit Auswahl und "Heute" */
@@ -39,19 +39,22 @@ export function VisitedDate({ restaurantId, date }: { restaurantId: number; date
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative min-w-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-label="Zuletzt besucht"
-        className={`press glass inline-flex items-center gap-1.5 rounded-full py-1.5 pr-2.5 pl-3 text-sm font-medium ${
+        className={`press glass flex w-full min-w-0 items-center justify-center gap-1 rounded-full px-2 py-3.5 text-sm font-medium ${
           value ? "text-ink" : "text-muted"
         }`}
       >
-        {pending ? <LoaderCircle className="size-4 animate-spin" /> : <CalendarDays className="size-4" />}
-        {value ? formatDate(value) : "Datum"}
-        <ChevronDown className={`size-3.5 opacity-60 transition-transform ${open ? "rotate-180" : ""}`} />
+        {pending ? (
+          <LoaderCircle className="size-4 shrink-0 animate-spin" />
+        ) : (
+          <CalendarDays className="size-3.5 shrink-0" />
+        )}
+        <span className="min-w-0 truncate tabular-nums">{value ? formatDateShort(value) : "Datum"}</span>
       </button>
 
       {open && (

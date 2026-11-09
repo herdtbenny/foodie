@@ -9,3 +9,9 @@ export function formatDate(date: string) {
 export function todayBerlin() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(new Date());
 }
+
+/** "YYYY-MM-DD" → "09.11.26" (kurz, für Chips) */
+export function formatDateShort(date: string) {
+  const [y, m, d] = date.split("-");
+  return `${d}.${m}.${y.slice(2)}`;
+}

@@ -1,11 +1,11 @@
-import { ArrowLeft, MapPin, Navigation } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { DeleteButton } from "@/components/delete-button";
 import { NotesForm } from "@/components/notes-form";
 import { OrderedSwitch } from "@/components/ordered-switch";
-import { EditableTitle, MetaChips, RestaurantInfo } from "@/components/restaurant-info";
+import { EditableTitle, MapsLinkRow, MetaChips } from "@/components/restaurant-info";
 import { PersonReview } from "@/components/person-review";
 import { VisitedDate } from "@/components/visited-date";
 import { CategoryRating } from "@/components/category-rating";
@@ -44,58 +44,40 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
         <h1 className="sr-only">{restaurant.name}</h1>
         <EditableTitle id={restaurant.id} name={restaurant.name} />
-        <MetaChips id={restaurant.id} cuisine={restaurant.cuisine} cuisines={cuisinesOf(all)} />
-        {restaurant.address && (
-          <p className="flex items-start gap-1.5 text-sm text-muted">
-            <MapPin className="mt-0.5 size-3.5 shrink-0" />
-            {restaurant.address}
-          </p>
-        )}
       </header>
 
-      {/* Karte + Google Maps */}
-      {(hasCoords || restaurant.mapsUrl) && (
-        <div className="overflow-hidden card rounded-3xl">
-          {hasCoords && (
-            <RestaurantMap
-              interactive={false}
-              zoom={14}
-              className="h-44"
-              points={[
-                {
-                  id: restaurant.id,
-                  name: restaurant.name,
-                  lat: restaurant.lat!,
-                  lng: restaurant.lng!,
-                  status: restaurant.status,
-                  overall: average,
-                  cuisine: restaurant.cuisine,
-                  subtitle: null,
-                },
-              ]}
-            />
-          )}
-          {restaurant.mapsUrl && (
-            <a
-              href={restaurant.mapsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium"
-            >
-              <Navigation className="size-4" />
-              In Google Maps öffnen
-            </a>
-          )}
-        </div>
-      )}
+      {/* Karte, darunter schmale Zeile mit dem Google-Maps-Link */}
+      <div className="card divide-y divide-line overflow-hidden rounded-3xl">
+        {hasCoords && (
+          <RestaurantMap
+            interactive={false}
+            zoom={14}
+            className="h-44"
+            points={[
+              {
+                id: restaurant.id,
+                name: restaurant.name,
+                lat: restaurant.lat!,
+                lng: restaurant.lng!,
+                status: restaurant.status,
+                overall: average,
+                cuisine: restaurant.cuisine,
+                subtitle: null,
+              },
+            ]}
+          />
+        )}
+        <MapsLinkRow id={restaurant.id} mapsUrl={restaurant.mapsUrl} />
+      </div>
+
+      {/* Chips unter der Karte: Küche, bei Bisherigen auch Datum und Vor Ort/Bestellt */}
+      <MetaChips id={restaurant.id} cuisine={restaurant.cuisine} cuisines={cuisinesOf(all)}>
+        {visited && <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />}
+        {visited && <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />}
+      </MetaChips>
 
       {visited ? (
         <section className="space-y-3">
-          {/* Datum und Vor Ort/Bestellt als kleine Chips nebeneinander */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />
-            <OrderedSwitch restaurantId={restaurant.id} ordered={restaurant.ordered} />
-          </div>
 
         </section>
       ) : (
@@ -107,19 +89,18 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
           <h2 className="px-2 font-display text-2xl font-semibold">Bewertung</h2>
           {/* Alles zur Bewertung in einer Karte: oben Gesamtnote, darunter die Kategorien */}
           <div className="card divide-y divide-line rounded-3xl">
-            <div className="flex items-center gap-4 p-4">
-              <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35)]">
-                <span className="font-display text-3xl leading-none font-semibold tabular-nums">
-                  {average !== null ? formatScore(average) : "–"}
-                </span>
-                <span className="text-[10px] opacity-80">gesamt</span>
+            {/* Kopf: Gesamtnote + eure beiden Noten in einer Zeile */}
+            <div className="flex items-center gap-3 px-3 py-2.5">
+              <span className="text-sm font-medium text-muted">Gesamt</span>
+              <div className="-ml-1 flex size-12 shrink-0 items-center justify-center rounded-full bg-pop font-display text-xl leading-none font-semibold text-white tabular-nums shadow-[inset_0_1px_0_rgb(255_255_255/0.35)]">
+                {average !== null ? formatScore(average) : "–"}
               </div>
-              <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1">
                 {PERSON_IDS.map((p) => (
-                  <div key={p} className="flex items-center gap-2">
+                  <div key={p} className="flex items-center gap-1.5">
                     <Avatar person={p} url={avatars[p]} className="size-6 text-[10px]" />
-                    <span className="flex-1 text-sm">{PEOPLE[p].name}</span>
-                    <span className={`font-display text-xl font-semibold tabular-nums ${PEOPLE[p].text}`}>
+                    <span className="text-sm text-muted">{PEOPLE[p].name}</span>
+                    <span className={`font-display text-lg leading-none font-semibold tabular-nums ${PEOPLE[p].text}`}>
                       {restaurant.scores[p] != null ? formatScore(restaurant.scores[p]!) : "–"}
                     </span>
                   </div>
@@ -127,7 +108,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               </div>
             </div>
 
-            <div className="space-y-6 p-4">
+            <div className="space-y-3.5 px-3 py-3">
               {restaurant.categories.length === 0 && (
                 <p className="text-sm text-muted">Noch keine Kategorien angelegt.</p>
               )}
@@ -167,8 +148,6 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
           ))}
         </section>
       )}
-
-      <RestaurantInfo id={restaurant.id} mapsUrl={restaurant.mapsUrl} />
 
       <section className="space-y-3">
         <h2 className="px-2 font-display text-2xl font-semibold">Notizen</h2>

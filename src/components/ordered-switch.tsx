@@ -32,12 +32,12 @@ export function OrderedSwitch({ restaurantId, ordered }: { restaurantId: number;
       disabled={pending}
       aria-pressed={value}
       title="Antippen zum Umschalten: Vor Ort / Bestellt"
-      className={`press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium disabled:opacity-70 ${
+      className={`press flex w-full min-w-0 items-center justify-center gap-1.5 rounded-full px-3 py-3.5 text-sm font-medium disabled:opacity-70 ${
         value ? "glass-ink" : "glass text-ink"
       }`}
     >
-      <Icon className="size-4" />
-      {value ? "Bestellt" : "Vor Ort"}
+      <Icon className="size-4 shrink-0" />
+      <span className="min-w-0 truncate">{value ? "Bestellt" : "Vor Ort"}</span>
     </button>
   );
 }
