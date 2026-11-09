@@ -77,7 +77,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
   return (
     <div className="space-y-4">
       <div
-        className={`flex items-center justify-between rounded-full px-5 py-3 text-sm font-medium ${
+        className={`press flex items-center justify-between rounded-full px-5 py-3 text-sm font-medium ${
           left === 0 ? "bg-ink text-paper" : "bg-pop text-white"
         }`}
         aria-live="polite"
@@ -93,7 +93,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
       </div>
       <ul className="space-y-2">
         {list.map((cat) => (
-          <li key={cat.id} className="space-y-3 rounded-3xl border border-line bg-surface p-4">
+          <li key={cat.id} className="space-y-3 card rounded-3xl p-4">
             <div className="flex items-center gap-2">
               <input
                 defaultValue={cat.name}
@@ -117,7 +117,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                 onClick={() => weigh(cat, cat.weight - STEP)}
                 disabled={cat.weight === 0}
                 aria-label={`${cat.name} weniger`}
-                className="flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-ink disabled:opacity-30"
+                className="press flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-ink disabled:opacity-30"
               >
                 <Minus className="size-4" />
               </button>
@@ -135,7 +135,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                 onClick={() => weigh(cat, cat.weight + STEP)}
                 disabled={left < STEP}
                 aria-label={`${cat.name} mehr`}
-                className="flex size-11 shrink-0 items-center justify-center rounded-full bg-ink text-paper disabled:opacity-30"
+                className="press flex size-11 shrink-0 items-center justify-center rounded-full bg-ink text-paper disabled:opacity-30"
               >
                 <Plus className="size-4" />
               </button>
@@ -179,7 +179,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
           type="button"
           onClick={add}
           disabled={pending || !newName.trim()}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-5 font-semibold text-paper disabled:opacity-50"
+          className="press flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-5 font-semibold text-paper disabled:opacity-50"
         >
           {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Plus className="size-4" />}
           Hinzufügen

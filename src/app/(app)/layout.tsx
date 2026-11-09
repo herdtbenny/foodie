@@ -22,14 +22,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <Link
           href="/kategorien"
           aria-label="Kategorien & Gewichtung"
-          className="flex size-8 items-center justify-center rounded-full border border-line bg-surface text-muted"
+          className="press flex size-8 items-center justify-center rounded-full border border-line bg-surface text-muted"
         >
           <SlidersHorizontal className="size-4" />
         </Link>
         <form action={switchPerson}>
           <button
             type="submit"
-            className="flex items-center gap-1.5 rounded-full border border-line bg-surface py-0.5 pr-2.5 pl-0.5 text-sm text-muted"
+            className="press flex items-center gap-1.5 rounded-full border border-line bg-surface py-0.5 pr-2.5 pl-0.5 text-sm text-muted"
             aria-label={`Angemeldet als ${PEOPLE[person].name} – wechseln`}
           >
             <Avatar person={person} url={avatarUrls()[person]} className="size-7 text-xs" />

@@ -37,7 +37,7 @@ export function NotesForm({ restaurantId, notes }: { restaurantId: number; notes
           type="button"
           onClick={save}
           disabled={pending}
-          className="flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-70"
+          className="press flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-70"
         >
           {pending && <LoaderCircle className="size-4 animate-spin" />}
           {pending ? "Speichert" : "Notizen speichern"}

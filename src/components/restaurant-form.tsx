@@ -8,6 +8,7 @@ import { todayBerlin } from "@/lib/format-date";
 import type { Status } from "@/lib/restaurants";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 import { RestaurantMap } from "./restaurant-map";
+import { Segmented } from "./segmented";
 
 type ExistingRestaurant = {
   id: number;
@@ -140,7 +141,7 @@ export function RestaurantForm({
       <input type="hidden" name="ordered" value={ordered ? "1" : ""} />
 
       {/* Google-Maps-Link zuerst – füllt den Rest aus */}
-      <div className="space-y-2 rounded-3xl border border-line bg-surface p-4">
+      <div className="space-y-2 card rounded-3xl p-4">
         <Field label="Google-Maps-Link" hint="Teilen → Link kopieren">
           <div className="flex gap-2">
             <input
@@ -159,7 +160,7 @@ export function RestaurantForm({
               type="button"
               onClick={pasteFromClipboard}
               aria-label="Link aus der Zwischenablage einfügen"
-              className="flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-4 text-sm font-medium text-paper"
+              className="press flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-4 text-sm font-medium text-paper"
             >
               <ClipboardPaste className="size-4" />
               <span className="hidden sm:inline">Einfügen</span>
@@ -266,50 +267,27 @@ export function RestaurantForm({
 
       <fieldset>
         <legend className="mb-1.5 px-2 text-sm font-medium">Status</legend>
-        <div className="grid grid-cols-2 gap-1 rounded-full border border-line bg-surface p-1">
-          {(
-            [
-              ["wunsch", "Wunschliste", Heart],
-              ["besucht", "Waren wir schon", History],
-            ] as const
-          ).map(([value, label, Icon]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setStatus(value)}
-              aria-pressed={status === value}
-              className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-sm font-medium transition-colors ${
-                status === value ? "bg-accent text-accent-ink" : "text-muted"
-              }`}
-            >
-              <Icon className="size-4" />
-              {label}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            { value: "wunsch", label: "Wunschliste", icon: Heart },
+            { value: "besucht", label: "Waren wir schon", icon: History },
+          ]}
+        />
       </fieldset>
 
       {status === "besucht" && (
-        <div className="grid grid-cols-2 gap-1 rounded-full border border-line bg-surface p-1">
-          {(
-            [
-              [false, "Vor Ort"],
-              [true, "Bestellt"],
-            ] as const
-          ).map(([option, label]) => (
-            <button
-              key={label}
-              type="button"
-              aria-pressed={ordered === option}
-              onClick={() => setOrderedState(option)}
-              className={`rounded-full px-3 py-2.5 text-sm font-medium transition-colors ${
-                ordered === option ? "bg-ink text-paper" : "text-muted"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Vor Ort oder bestellt"
+          value={ordered}
+          onChange={setOrderedState}
+          options={[
+            { value: false, label: "Vor Ort" },
+            { value: true, label: "Bestellt" },
+          ]}
+        />
       )}
 
       {status === "besucht" && (
@@ -343,7 +321,7 @@ export function RestaurantForm({
       <button
         type="submit"
         disabled={pending || linkState === "loading"}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink disabled:opacity-60"
+        className="press flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink disabled:opacity-60"
       >
         {pending && <LoaderCircle className="size-5 animate-spin" />}
         {pending ? "Speichern …" : restaurant ? "Speichern" : status === "besucht" ? "Eintragen & bewerten" : "Auf die Wunschliste"}

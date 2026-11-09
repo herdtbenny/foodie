@@ -119,7 +119,7 @@ export function RestaurantInfo({
             type="button"
             aria-pressed={currentKind === k}
             onClick={() => chooseKind(k)}
-            className={`shrink-0 rounded-full border px-3.5 py-2 text-sm transition-colors ${
+            className={`press shrink-0 rounded-full border px-3.5 py-2 text-sm transition-colors ${
               currentKind === k ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted"
             }`}
           >
@@ -128,7 +128,7 @@ export function RestaurantInfo({
         ))}
       </div>
 
-      <div className="divide-y divide-line rounded-3xl border border-line bg-surface">
+      <div className="divide-y divide-line card rounded-3xl">
         <Row label="Küche">
           <input
             list="info-cuisines"

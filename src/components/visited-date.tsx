@@ -36,7 +36,7 @@ export function VisitedDate({
   }
 
   return (
-    <div className="flex items-center gap-1.5 rounded-full border border-line bg-surface p-1 pl-3.5">
+    <div className="press flex items-center gap-1.5 rounded-full border border-line bg-surface p-1 pl-3.5">
       <Calendar className="size-4 shrink-0 text-muted" />
       <span className="shrink-0 text-sm text-muted">Besucht</span>
       <input

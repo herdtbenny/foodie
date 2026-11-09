@@ -102,7 +102,7 @@ export function RestaurantList({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 pl-4 focus-within:border-ink">
+      <div className="glass sticky top-2 z-10 flex items-center gap-1 rounded-full p-1 pl-4 focus-within:ring-2 focus-within:ring-ink/20">
         <Search className="size-4 shrink-0 text-muted" />
         <input
           type="search"
@@ -176,7 +176,7 @@ export function RestaurantList({
             <button
               type="button"
               onClick={() => setFilter("")}
-              className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm text-paper"
+              className="press inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm text-paper"
             >
               {filterValue}
               <X className="size-3.5" />
@@ -186,7 +186,7 @@ export function RestaurantList({
             <button
               type="button"
               onClick={() => setSort(sorts[0].key)}
-              className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-muted"
+              className="press inline-flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-muted"
             >
               {sorts.find((s) => s.key === sort)?.label}
               <X className="size-3.5" />

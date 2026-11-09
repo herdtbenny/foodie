@@ -41,7 +41,7 @@ export function LoginForm({
               name="person"
               value={id}
               disabled={pending}
-              className="flex w-full items-center gap-3 rounded-full border-2 border-line bg-surface p-2 pr-6 text-lg transition-colors hover:border-ink active:border-ink disabled:opacity-60"
+              className="press flex w-full items-center gap-3 rounded-full border-2 border-line bg-surface p-2 pr-6 text-lg transition-colors hover:border-ink active:border-ink disabled:opacity-60"
             >
               <Avatar person={id} url={avatars[id]} className="size-12 text-lg" />
               <span className="font-medium">{PEOPLE[id].name}</span>

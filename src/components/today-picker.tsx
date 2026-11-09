@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { kindOrder, type RestaurantSummary } from "@/lib/restaurants";
 import { formatScore, ScorePills } from "./score";
+import { Segmented } from "./segmented";
 
 type Source = "egal" | "neu" | "bewaehrt";
 
@@ -68,28 +69,19 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-1 rounded-full border border-line bg-surface p-1">
-          {SOURCES.map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={source === value}
-              onClick={() => setSource(value)}
-              className={`rounded-full px-2 py-2.5 text-sm font-medium transition-colors ${
-                source === value ? "bg-ink text-paper" : "text-muted"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Woraus würfeln"
+          value={source}
+          onChange={setSource}
+          options={SOURCES.map(([value, label]) => ({ value, label }))}
+        />
       </div>
 
       <button
         type="button"
         onClick={roll}
         disabled={pool.length === 0}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-pop px-5 py-4 text-lg font-semibold text-white disabled:opacity-40"
+        className="press flex w-full items-center justify-center gap-2 rounded-full bg-pop px-5 py-4 text-lg font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_10px_24px_-10px_rgb(215_57_43/0.7)] disabled:opacity-40"
       >
         {rolled ? <RotateCcw className="size-5" /> : <Dices className="size-5" />}
         {rolled ? "Nochmal würfeln" : "Würfeln"}
@@ -98,7 +90,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
 
       {rolled &&
         (pick ? (
-          <div className="space-y-3 rounded-3xl bg-ink p-5 text-paper">
+          <div className="glass-ink space-y-3 rounded-3xl p-5">
             <p className="text-[11px] font-semibold tracking-wider uppercase opacity-70">
               {[pick.status === "wunsch" ? "Wunschliste" : "Bisherige", pick.kind, pick.cuisine]
                 .filter(Boolean)
@@ -109,7 +101,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
                 {pick.name}
               </h2>
               {pick.overall !== null && (
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-pop font-display text-2xl font-semibold text-white">
+                <span className="press flex size-14 shrink-0 items-center justify-center rounded-full bg-pop font-display text-2xl font-semibold text-white">
                   {formatScore(pick.overall)}
                 </span>
               )}
@@ -147,7 +139,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
       {top.length > 0 && (
         <section className="space-y-3">
           <h2 className="px-2 font-display text-2xl font-semibold">Eure Top {top.length}</h2>
-          <ol className="divide-y divide-line overflow-hidden rounded-3xl border border-line bg-surface">
+          <ol className="divide-y divide-line overflow-hidden card rounded-3xl">
             {top.map((r, i) => (
               <li key={r.id}>
                 <Link href={`/restaurants/${r.id}`} className="flex items-center gap-3 px-4 py-3">

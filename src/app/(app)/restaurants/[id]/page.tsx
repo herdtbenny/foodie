@@ -59,7 +59,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       {/* Karte + Google Maps */}
       {(hasCoords || restaurant.mapsUrl) && (
-        <div className="overflow-hidden rounded-3xl border border-line bg-surface">
+        <div className="overflow-hidden card rounded-3xl">
           {hasCoords && (
             <RestaurantMap
               interactive={false}
@@ -103,7 +103,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
           {/* Gesamtnote */}
           <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
-            <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white">
+            <div className="press flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white">
               <span className="font-display text-3xl leading-none font-semibold tabular-nums">
                 {average !== null ? formatScore(average) : "–"}
               </span>
@@ -123,7 +123,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
           </div>
 
           {/* Kategorien */}
-          <div className="space-y-6 rounded-3xl border border-line bg-surface p-4">
+          <div className="space-y-6 card rounded-3xl p-4">
             {restaurant.categories.length === 0 && (
               <p className="text-sm text-muted">Noch keine Kategorien angelegt.</p>
             )}

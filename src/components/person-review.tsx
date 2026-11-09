@@ -77,7 +77,7 @@ export function PersonReview({
   }
 
   return (
-    <div className="space-y-3 rounded-3xl border border-line bg-surface p-4">
+    <div className="space-y-3 card rounded-3xl p-4">
       <div className="flex items-center gap-2.5">
         {avatar}
         <span className="flex-1 font-medium">{editable ? "Du" : p.name}</span>
@@ -86,7 +86,7 @@ export function PersonReview({
             type="button"
             onClick={toggleRecommend}
             aria-pressed={recommend}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
               recommend ? "bg-pop text-white" : "border border-line text-muted hover:border-ink hover:text-ink"
             }`}
           >
@@ -95,7 +95,7 @@ export function PersonReview({
           </button>
         ) : (
           shownRecommend && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-pop px-3 py-1.5 text-sm font-medium text-white">
+            <span className="press inline-flex items-center gap-1.5 rounded-full bg-pop px-3 py-1.5 text-sm font-medium text-white">
               <ThumbsUp className="size-4" />
               Empfiehlt es
             </span>
@@ -113,7 +113,7 @@ export function PersonReview({
                 type="button"
                 onClick={() => fileInput.current?.click()}
                 disabled={busy === "photo"}
-                className="inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1.5 text-sm text-paper backdrop-blur"
+                className="press inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1.5 text-sm text-paper backdrop-blur"
               >
                 {busy === "photo" ? <LoaderCircle className="size-4 animate-spin" /> : <Camera className="size-4" />}
                 Ersetzen
@@ -124,7 +124,7 @@ export function PersonReview({
                   if (confirm("Foto entfernen?")) run("photo", () => removePhoto(restaurantId), "Foto entfernt");
                 }}
                 aria-label="Foto entfernen"
-                className="flex size-8 items-center justify-center rounded-full bg-ink/80 text-paper backdrop-blur"
+                className="press flex size-8 items-center justify-center rounded-full bg-ink/80 text-paper backdrop-blur"
               >
                 <Trash className="size-4" />
               </button>
@@ -137,7 +137,7 @@ export function PersonReview({
             type="button"
             onClick={() => fileInput.current?.click()}
             disabled={busy === "photo"}
-            className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed border-line py-3 text-sm text-muted"
+            className="press flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed border-line py-3 text-sm text-muted"
           >
             {busy === "photo" ? <LoaderCircle className="size-4 animate-spin" /> : <Camera className="size-4" />}
             {busy === "photo" ? "Wird hochgeladen …" : "Foto hinzufügen"}
@@ -170,7 +170,7 @@ export function PersonReview({
               type="button"
               onClick={() => run("dish", () => saveDish(restaurantId, dish), "Gespeichert")}
               disabled={pending}
-              className="flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-70"
+              className="press flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-70"
             >
               {busy === "dish" && <LoaderCircle className="size-4 animate-spin" />}
               Speichern

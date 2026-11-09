@@ -4,6 +4,7 @@ import { Bike, Store } from "lucide-react";
 import { useState, useTransition } from "react";
 import { setOrdered } from "@/lib/actions";
 import { SAVE_FAILED, toast } from "@/lib/toast";
+import { Segmented } from "./segmented";
 
 /** Vor Ort gegessen oder bestellt – bei "Bestellt" zählen Kategorien wie Ambiente nicht */
 export function OrderedSwitch({ restaurantId, ordered }: { restaurantId: number; ordered: boolean }) {
@@ -25,31 +26,15 @@ export function OrderedSwitch({ restaurantId, ordered }: { restaurantId: number;
   }
 
   return (
-    <div
-      role="radiogroup"
-      aria-label="Vor Ort oder bestellt"
-      className={`grid grid-cols-2 gap-1 rounded-full border border-line bg-surface p-1 ${pending ? "opacity-70" : ""}`}
-    >
-      {(
-        [
-          [false, "Vor Ort", Store],
-          [true, "Bestellt", Bike],
-        ] as const
-      ).map(([option, label, Icon]) => (
-        <button
-          key={label}
-          type="button"
-          role="radio"
-          aria-checked={value === option}
-          onClick={() => choose(option)}
-          className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors ${
-            value === option ? "bg-ink text-paper" : "text-muted"
-          }`}
-        >
-          <Icon className="size-4" />
-          {label}
-        </button>
-      ))}
-    </div>
+    <Segmented
+      label="Vor Ort oder bestellt"
+      value={value}
+      onChange={choose}
+      disabled={pending}
+      options={[
+        { value: false, label: "Vor Ort", icon: Store },
+        { value: true, label: "Bestellt", icon: Bike },
+      ]}
+    />
   );
 }

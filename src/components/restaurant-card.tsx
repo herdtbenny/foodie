@@ -12,7 +12,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
   const tags = [restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ");
 
   return (
-    <div className="relative flex min-w-0 items-center gap-3 rounded-3xl border border-line bg-surface p-2 pr-3">
+    <div className="relative flex min-w-0 items-center gap-3 card rounded-3xl p-2 pr-3">
       {/* Icon zur Küche statt Foto */}
       <div
         className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-line text-muted"
@@ -53,7 +53,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
             {restaurant.recommendedBy.length > 0 && (
               <span
                 title="Weiterempfohlen"
-                className="inline-flex items-center gap-1 rounded-full bg-pop px-2 py-0.5 text-xs font-semibold text-white"
+                className="press inline-flex items-center gap-1 rounded-full bg-pop px-2 py-0.5 text-xs font-semibold text-white"
               >
                 <ThumbsUp className="size-3" />
                 {restaurant.recommendedBy.length === 2 ? "beide" : ""}
