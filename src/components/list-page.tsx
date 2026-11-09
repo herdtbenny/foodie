@@ -1,0 +1,56 @@
+import { Bookmark, Plus, Star } from "lucide-react";
+import Link from "next/link";
+import { listRestaurants, type Status } from "@/lib/restaurants";
+import { RestaurantList } from "./restaurant-list";
+
+const COPY = {
+  besucht: {
+    title: "Waren wir schon",
+    empty: "Noch kein Restaurant bewertet",
+    hint: "Tragt ein, wo ihr wart, und gebt beide eure Note von 1 bis 10.",
+    cta: "Restaurant eintragen",
+    icon: Star,
+  },
+  wunsch: {
+    title: "Wollen wir hin",
+    empty: "Die Wunschliste ist leer",
+    hint: "Google-Maps-Link einfügen, fertig – so geht kein Tipp mehr verloren.",
+    cta: "Auf die Wunschliste",
+    icon: Bookmark,
+  },
+} as const;
+
+/** Gemeinsame Seite für "Besucht" und "Wunschliste" */
+export async function ListPage({ status }: { status: Status }) {
+  const restaurants = (await listRestaurants()).filter((r) => r.status === status);
+  const copy = COPY[status];
+  const Icon = copy.icon;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h1 className="font-display text-3xl font-semibold">{copy.title}</h1>
+        {restaurants.length > 0 && <p className="text-sm text-muted tabular-nums">{restaurants.length}</p>}
+      </div>
+
+      {restaurants.length === 0 ? (
+        <div className="flex flex-col items-center px-6 py-16 text-center">
+          <div className="mb-5 flex size-16 items-center justify-center rounded-3xl bg-accent/10 text-accent">
+            <Icon className="size-8" strokeWidth={1.6} />
+          </div>
+          <h2 className="font-display text-2xl font-semibold">{copy.empty}</h2>
+          <p className="mt-2 max-w-xs text-muted">{copy.hint}</p>
+          <Link
+            href={`/neu?status=${status}`}
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 font-semibold text-accent-ink"
+          >
+            <Plus className="size-5" />
+            {copy.cta}
+          </Link>
+        </div>
+      ) : (
+        <RestaurantList restaurants={restaurants} status={status} />
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #fbf7f0;
+  --surface: #ffffff;
+  --ink: #2a2420;
+  --muted: #7a6e64;
+  --line: #e9e0d4;
+  --accent: #c8502a;
+  --accent-ink: #ffffff;
+  --benny: #3f7a57;
+  --lisa: #b8406f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #171310;
+    --surface: #221d19;
+    --ink: #f2ebe2;
+    --muted: #a59789;
+    --line: #3a322b;
+    --accent: #e0693f;
+    --accent-ink: #1b1512;
+    --benny: #6fb08a;
+    --lisa: #e37aa3;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-benny: var(--benny);
+  --color-lisa: var(--lisa);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-fraunces);
+}
+
+/* Nie seitlich scrollen – `clip` statt `hidden`, damit fixed/sticky weiter funktioniert */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Papierfarbe nur auf <html>: reicht hinter die Safari-Leisten. <body> bleibt durchsichtig,
+   sonst verdeckt es das Hintergrundbild (das mit -z-10 hinter dem Inhalt liegt). */
+html {
+  background: var(--paper);
+}
+
+/* iOS zoomt bei Eingabefeldern unter 16px hinein und die Seite wird seitlich verschiebbar */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+body {
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Karte: Pins und Popups im Stil der App */
+.foodie-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  font: 600 13px/1 var(--font-inter), system-ui, sans-serif;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+  border: 2px solid var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+.foodie-pin.is-visited {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.foodie-pin.is-wish {
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--surface);
+  color: var(--ink);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 1.25rem;
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+}
+.foodie-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: 14px/1.35 var(--font-inter), system-ui, sans-serif;
+  min-width: 140px;
+}
+.foodie-popup strong {
+  font-family: var(--font-fraunces), serif;
+  font-size: 16px;
+}
+.foodie-popup span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.foodie-popup button {
+  margin-top: 8px;
+  align-self: flex-start;
+  border-radius: 9999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.leaflet-container {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
+  }
+}
+
+/* Zoom-Buttons rund wie alle Buttons */
+.leaflet-bar {
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.leaflet-bar a {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 34px !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+}
