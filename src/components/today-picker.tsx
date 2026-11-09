@@ -9,12 +9,12 @@ import { formatScore, ScorePills } from "./score";
 type Source = "egal" | "neu" | "bewaehrt";
 
 const SOURCES: [Source, string][] = [
-  ["egal", "Egal"],
-  ["neu", "Was Neues"],
-  ["bewaehrt", "Bewährtes"],
+  ["egal", "Beides"],
+  ["bewaehrt", "Bisherige"],
+  ["neu", "Wunschliste"],
 ];
 
-/** Gute alte Bekannte: Gesamtnote ab 7 oder von jemandem empfohlen */
+/** Bisherige, die sich lohnen: Gesamtnote ab 7 oder von jemandem empfohlen */
 const isProven = (r: RestaurantSummary) =>
   r.status === "besucht" && ((r.overall ?? 0) >= 7 || r.recommendedBy.length > 0);
 
@@ -100,7 +100,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
         (pick ? (
           <div className="space-y-3 rounded-3xl bg-ink p-5 text-paper">
             <p className="text-[11px] font-semibold tracking-wider uppercase opacity-70">
-              {[pick.status === "wunsch" ? "Von der Wunschliste" : "Bewährt", pick.kind, pick.cuisine]
+              {[pick.status === "wunsch" ? "Wunschliste" : "Bisherige", pick.kind, pick.cuisine]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
