@@ -23,15 +23,19 @@ export function StatusToggle({ restaurantId, status }: { restaurantId: number; s
   }
 
   if (visited) {
+    // Klein, sitzt in der Zeile "Zuletzt besucht"
     return (
       <button
         type="button"
-        onClick={() => change("wunsch")}
+        onClick={() => {
+          if (confirm("Zurück auf die Wunschliste? Das Besuchsdatum wird entfernt.")) change("wunsch");
+        }}
         disabled={pending}
-        className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm text-muted disabled:opacity-60"
+        aria-label="Zurück auf die Wunschliste"
+        title="Zurück auf die Wunschliste"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:text-ink disabled:opacity-60"
       >
-        {pending ? <LoaderCircle className="size-3.5 animate-spin" /> : <Bookmark className="size-3.5" />}
-        Zurück auf die Wunschliste
+        {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Bookmark className="size-4" />}
       </button>
     );
   }

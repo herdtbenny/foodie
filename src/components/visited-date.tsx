@@ -7,7 +7,16 @@ import { formatDate, todayBerlin } from "@/lib/format-date";
 import { SAVE_FAILED, toast } from "@/lib/toast";
 
 /** "Zuletzt besucht": Datum direkt änderbar, plus "Heute" */
-export function VisitedDate({ restaurantId, date }: { restaurantId: number; date: string | null }) {
+export function VisitedDate({
+  restaurantId,
+  date,
+  children,
+}: {
+  restaurantId: number;
+  date: string | null;
+  /** z. B. der kleine "Zurück auf die Wunschliste"-Button */
+  children?: React.ReactNode;
+}) {
   const [value, setValue] = useState(date ?? "");
   const [pending, startTransition] = useTransition();
   const today = todayBerlin();
@@ -27,9 +36,9 @@ export function VisitedDate({ restaurantId, date }: { restaurantId: number; date
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-line bg-surface p-1 pl-4">
+    <div className="flex items-center gap-1.5 rounded-full border border-line bg-surface p-1 pl-3.5">
       <Calendar className="size-4 shrink-0 text-muted" />
-      <span className="shrink-0 text-sm text-muted">Zuletzt besucht</span>
+      <span className="shrink-0 text-sm text-muted">Besucht</span>
       <input
         type="date"
         value={value}
@@ -49,6 +58,7 @@ export function VisitedDate({ restaurantId, date }: { restaurantId: number; date
           Heute
         </button>
       )}
+      {children}
     </div>
   );
 }

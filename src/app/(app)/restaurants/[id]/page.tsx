@@ -1,4 +1,4 @@
-import { ArrowLeft, MapPin, Navigation, Pencil, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, MapPin, Navigation, Pencil } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -31,7 +31,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   const hasCoords = restaurant.lat != null && restaurant.lng != null;
 
   return (
-    <article className="space-y-8">
+    <article className="space-y-5">
       <div className="flex items-center justify-between">
         <Link href={visited ? "/" : "/wunschliste"} className="inline-flex items-center gap-1.5 text-sm text-muted">
           <ArrowLeft className="size-4" />
@@ -46,19 +46,17 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         </Link>
       </div>
 
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-          {[restaurant.kind, restaurant.cuisine].filter(Boolean).length > 0 && (
-            <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
-              {[restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ")}
-            </p>
-          )}
-          {!visited && <p className="text-muted">Auf der Wunschliste</p>}
-        </div>
+      <header className="-mt-1 space-y-1">
+        {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
         <h1 className="font-display text-4xl leading-tight font-semibold text-balance">{restaurant.name}</h1>
+        {(restaurant.kind || restaurant.cuisine || !visited) && (
+          <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+            {[!visited && "Wunschliste", restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ")}
+          </p>
+        )}
         {restaurant.address && (
-          <p className="flex items-start gap-1.5 text-muted">
-            <MapPin className="mt-1 size-4 shrink-0" />
+          <p className="flex items-start gap-1.5 text-sm text-muted">
+            <MapPin className="mt-0.5 size-3.5 shrink-0" />
             {restaurant.address}
           </p>
         )}
@@ -102,8 +100,10 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
       )}
 
       {visited ? (
-        <section className="space-y-4">
-          <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn} />
+        <section className="space-y-3">
+          <VisitedDate restaurantId={restaurant.id} date={restaurant.visitedOn}>
+            <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
+          </VisitedDate>
 
           {/* Gesamtnote */}
           <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
@@ -146,16 +146,6 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
                 }))}
               />
             ))}
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
-            <Link
-              href="/kategorien"
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm text-muted"
-            >
-              <SlidersHorizontal className="size-3.5" />
-              Kategorien & Gewichtung
-            </Link>
           </div>
         </section>
       ) : (
