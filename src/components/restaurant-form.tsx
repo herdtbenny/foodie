@@ -29,7 +29,7 @@ const inputClass =
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 flex items-baseline justify-between gap-2 text-sm font-medium">
+      <span className="mb-1.5 flex items-baseline justify-between gap-2 px-2 text-sm font-medium">
         {label}
         {hint && <span className="text-xs font-normal text-muted">{hint}</span>}
       </span>
@@ -141,7 +141,7 @@ export function RestaurantForm({
 
       {/* Google-Maps-Link zuerst – füllt den Rest aus */}
       <div className="space-y-2 rounded-3xl border border-line bg-surface p-4">
-        <Field label="Google-Maps-Link" hint="In Maps: Teilen → Link kopieren">
+        <Field label="Google-Maps-Link" hint="Teilen → Link kopieren">
           <div className="flex gap-2">
             <input
               name="mapsUrl"
@@ -214,7 +214,7 @@ export function RestaurantForm({
       </Field>
 
       <fieldset>
-        <legend className="mb-1.5 flex w-full items-baseline justify-between text-sm font-medium">
+        <legend className="mb-1.5 flex w-full items-baseline justify-between px-2 text-sm font-medium">
           Art <span className="text-xs font-normal text-muted">optional</span>
         </legend>
         <div className="flex flex-wrap gap-1.5">
@@ -265,7 +265,7 @@ export function RestaurantForm({
       </div>
 
       <fieldset>
-        <legend className="mb-1.5 text-sm font-medium">Status</legend>
+        <legend className="mb-1.5 px-2 text-sm font-medium">Status</legend>
         <div className="grid grid-cols-2 gap-1 rounded-full border border-line bg-surface p-1">
           {(
             [

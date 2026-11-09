@@ -8,7 +8,7 @@ export default async function NewPage({ searchParams }: PageProps<"/neu">) {
   const { restaurants } = await listRestaurants();
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-3xl font-semibold">Neues Restaurant</h1>
+      <h1 className="px-2 font-display text-3xl font-semibold">Neues Restaurant</h1>
       <RestaurantForm
         cuisines={valuesOf(restaurants, "cuisine")}
         kinds={valuesOf(restaurants, "kind")}

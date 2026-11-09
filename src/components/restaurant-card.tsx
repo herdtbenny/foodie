@@ -15,9 +15,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
     <div className="relative flex min-w-0 items-center gap-3 rounded-3xl border border-line bg-surface p-2 pr-3">
       {/* Icon zur Küche statt Foto */}
       <div
-        className={`flex size-16 shrink-0 items-center justify-center rounded-2xl ${
-          visited ? "bg-ink text-paper" : "border border-line text-muted"
-        }`}
+        className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-line text-muted"
       >
         <CuisineIcon cuisine={restaurant.cuisine} kind={restaurant.kind} name={restaurant.name} className="size-7" />
       </div>

@@ -35,12 +35,12 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
   return (
     <article className="space-y-5">
-      <Link href={visited ? "/" : "/wunschliste"} className="inline-flex items-center gap-1.5 text-sm text-muted">
+      <Link href={visited ? "/" : "/wunschliste"} className="inline-flex items-center gap-1.5 px-2 text-sm text-muted">
         <ArrowLeft className="size-4" />
         {visited ? "Bisherige" : "Wunschliste"}
       </Link>
 
-      <header className="-mt-1 space-y-1">
+      <header className="-mt-1 space-y-1 px-2">
         {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
         <h1 className="sr-only">{restaurant.name}</h1>
         <EditableTitle id={restaurant.id} name={restaurant.name} />
@@ -151,7 +151,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       {visited && (
         <section className="space-y-3">
-          <h2 className="font-display text-2xl font-semibold">Was wir gegessen haben</h2>
+          <h2 className="px-2 font-display text-2xl font-semibold">Was wir gegessen haben</h2>
           {[person, ...PERSON_IDS.filter((p) => p !== person)].map((p) => (
             <PersonReview
               key={p}
@@ -176,7 +176,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
       />
 
       <section className="space-y-3">
-        <h2 className="font-display text-2xl font-semibold">Notizen</h2>
+        <h2 className="px-2 font-display text-2xl font-semibold">Notizen</h2>
         <NotesForm restaurantId={restaurant.id} notes={restaurant.notes} />
       </section>
 

@@ -14,7 +14,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-3xl flex-col">
-      <header className="flex items-center justify-between gap-3 px-2 pt-[max(env(safe-area-inset-top),1rem)] pb-3 sm:px-4">
+      <header className="flex items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),1rem)] pb-3 sm:px-6">
         <Link href="/" aria-label="foodie – Startseite" className="min-w-0">
           <Wordmark className="text-4xl" />
         </Link>

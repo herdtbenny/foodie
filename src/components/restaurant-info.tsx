@@ -107,7 +107,7 @@ export function RestaurantInfo({
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 px-2">
         <h2 className="font-display text-2xl font-semibold">Infos</h2>
         {pending && <LoaderCircle className="size-4 animate-spin text-muted" />}
       </div>

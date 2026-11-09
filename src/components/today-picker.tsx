@@ -55,7 +55,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-4xl font-semibold">Wohin heute?</h1>
+      <h1 className="px-2 font-display text-4xl font-semibold">Wohin heute?</h1>
 
       <div className="space-y-3">
         <div className="no-scrollbar -mx-2 flex gap-1.5 overflow-x-auto px-2 sm:-mx-4 sm:px-4">
@@ -146,7 +146,7 @@ export function TodayPicker({ restaurants }: { restaurants: RestaurantSummary[] 
 
       {top.length > 0 && (
         <section className="space-y-3">
-          <h2 className="font-display text-2xl font-semibold">Eure Top {top.length}</h2>
+          <h2 className="px-2 font-display text-2xl font-semibold">Eure Top {top.length}</h2>
           <ol className="divide-y divide-line overflow-hidden rounded-3xl border border-line bg-surface">
             {top.map((r, i) => (
               <li key={r.id}>
