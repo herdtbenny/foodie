@@ -26,7 +26,7 @@ export function DeleteButton({ id, title }: { id: number; title: string }) {
           }
         });
       }}
-      className="mx-auto flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-accent disabled:opacity-60"
+      className="mx-auto flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-red-600 disabled:opacity-60"
     >
       {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Trash className="size-4" />}
       {pending ? "Wird gelöscht …" : "Restaurant löschen"}

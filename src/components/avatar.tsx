@@ -16,7 +16,7 @@ export function Avatar({
       <img
         src={url}
         alt=""
-        className={`shrink-0 rounded-full object-cover ${PEOPLE[person].avatarPosition} ${className}`}
+        className={`shrink-0 rounded-full object-cover ${className}`}
       />
     );
   }

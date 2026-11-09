@@ -23,7 +23,7 @@ export function BottomNav() {
           <Bookmark className="size-5" />
           Wunschliste
         </Link>
-        <Link href="/neu" aria-label="Neues Restaurant" className={`${itemClass} bg-accent text-accent-ink shadow-md`}>
+        <Link href="/neu" aria-label="Neues Restaurant" className={`${itemClass} bg-accent text-accent-ink`}>
           <Plus className="size-5" strokeWidth={2.5} />
           Neu
         </Link>

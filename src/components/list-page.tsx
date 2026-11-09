@@ -35,7 +35,7 @@ export async function ListPage({ status }: { status: Status }) {
 
       {restaurants.length === 0 ? (
         <div className="flex flex-col items-center px-6 py-16 text-center">
-          <div className="mb-5 flex size-16 items-center justify-center rounded-3xl bg-accent/10 text-accent">
+          <div className="mb-5 flex size-16 items-center justify-center rounded-3xl border border-line text-muted">
             <Icon className="size-8" strokeWidth={1.6} />
           </div>
           <h2 className="font-display text-2xl font-semibold">{copy.empty}</h2>

@@ -47,7 +47,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-          {restaurant.cuisine && <p className="font-medium text-accent">{restaurant.cuisine}</p>}
+          {restaurant.cuisine && <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">{restaurant.cuisine}</p>}
           {visited && restaurant.visitedOn && (
             <p className="inline-flex items-center gap-1 text-muted">
               <Calendar className="size-3.5" />
@@ -93,7 +93,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               rel="noreferrer"
               className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium"
             >
-              <Navigation className="size-4 text-accent" />
+              <Navigation className="size-4" />
               In Google Maps öffnen
             </a>
           )}
@@ -110,7 +110,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               </p>
             )}
           </div>
-          <div className="space-y-4 rounded-3xl border border-line bg-surface p-4">
+          <div className="space-y-5 rounded-3xl border border-line bg-surface p-4">
             {PERSON_IDS.map((p) => (
               <RatingSlider
                 key={p}
@@ -119,6 +119,8 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
                 label={p === person ? "Du" : PEOPLE[p].name}
                 editable={p === person}
                 colorClass={PEOPLE[p].text}
+                bgClass={PEOPLE[p].bg}
+                softClass={PEOPLE[p].soft}
                 avatar={<Avatar person={p} url={avatars[p]} className="size-8 text-xs" />}
               />
             ))}

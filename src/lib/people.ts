@@ -1,6 +1,6 @@
 export const PEOPLE = {
-  benny: { name: "Benny", initial: "B", text: "text-benny", bg: "bg-benny", soft: "bg-benny/15", avatarPosition: "object-[center_32%]" },
-  lisa: { name: "Lisa", initial: "L", text: "text-lisa", bg: "bg-lisa", soft: "bg-lisa/15", avatarPosition: "object-[center_22%]" },
+  german: { name: "German", initial: "G", text: "text-german", bg: "bg-german", soft: "bg-german/12", ring: "ring-german" },
+  evelyne: { name: "Evelyne", initial: "E", text: "text-evelyne", bg: "bg-evelyne", soft: "bg-evelyne/12", ring: "ring-evelyne" },
 } as const;
 
 export type Person = keyof typeof PEOPLE;

@@ -7,23 +7,23 @@ import { RestaurantCard } from "./restaurant-card";
 
 const SORTS = {
   beste: "Beste zuerst",
-  benny: "Bennys Favoriten",
-  lisa: "Lisas Favoriten",
+  german: "Germans Favoriten",
+  evelyne: "Evelynes Favoriten",
   datum: "Zuletzt besucht",
   neu: "Neu eingetragen",
   az: "A–Z",
 } as const;
 type Sort = keyof typeof SORTS;
 
-const VISITED_SORTS: Sort[] = ["beste", "benny", "lisa", "datum", "az"];
+const VISITED_SORTS: Sort[] = ["beste", "german", "evelyne", "datum", "az"];
 const WISH_SORTS: Sort[] = ["neu", "az"];
 
 const byDesc = (a: number | null | undefined, b: number | null | undefined) => (b ?? -1) - (a ?? -1);
 
 const sorters: Record<Sort, (a: RestaurantSummary, b: RestaurantSummary) => number> = {
   beste: (a, b) => byDesc(averageScore(a.scores), averageScore(b.scores)),
-  benny: (a, b) => byDesc(a.scores.benny, b.scores.benny),
-  lisa: (a, b) => byDesc(a.scores.lisa, b.scores.lisa),
+  german: (a, b) => byDesc(a.scores.german, b.scores.german),
+  evelyne: (a, b) => byDesc(a.scores.evelyne, b.scores.evelyne),
   datum: (a, b) => (b.visitedOn ?? "").localeCompare(a.visitedOn ?? ""),
   neu: (a, b) => b.createdAt.localeCompare(a.createdAt),
   az: (a, b) => a.name.localeCompare(b.name, "de"),
@@ -61,7 +61,7 @@ export function RestaurantList({ restaurants, status }: { restaurants: Restauran
             onChange={(e) => setQ(e.target.value)}
             placeholder="Suchen: Name, Küche, Ort …"
             aria-label="Suchen"
-            className="w-full rounded-full border border-line bg-surface py-2.5 pr-10 pl-10 outline-none placeholder:text-muted/70 focus:border-accent [&::-webkit-search-cancel-button]:hidden"
+            className="w-full rounded-full border border-line bg-surface py-2.5 pr-10 pl-10 outline-none placeholder:text-muted/70 focus:border-ink [&::-webkit-search-cancel-button]:hidden"
           />
           {q && (
             <button
@@ -78,7 +78,7 @@ export function RestaurantList({ restaurants, status }: { restaurants: Restauran
           value={sort}
           onChange={(e) => setSort(e.target.value as Sort)}
           aria-label="Sortierung"
-          className="w-36 shrink-0 appearance-none rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-accent"
+          className="w-36 shrink-0 appearance-none rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink"
         >
           {sorts.map((s) => (
             <option key={s} value={s}>

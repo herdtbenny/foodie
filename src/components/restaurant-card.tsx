@@ -13,7 +13,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
     <div className="relative flex min-w-0 items-center gap-3 rounded-3xl border border-line bg-surface p-2 pr-3">
       <div
         className={`flex size-16 shrink-0 flex-col items-center justify-center rounded-2xl ${
-          visited ? "bg-accent text-accent-ink" : "bg-accent/10 text-accent"
+          visited ? "bg-accent text-accent-ink" : "border border-line text-muted"
         }`}
       >
         {visited ? (
@@ -38,7 +38,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
           {restaurant.name}
         </Link>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
-          {restaurant.cuisine && <span className="shrink-0 font-medium text-accent">{restaurant.cuisine}</span>}
+          {restaurant.cuisine && <span className="shrink-0 text-[11px] font-semibold tracking-wider text-muted uppercase">{restaurant.cuisine}</span>}
           {restaurant.cuisine && restaurant.address && <span aria-hidden>·</span>}
           {restaurant.address && <span className="truncate">{restaurant.address}</span>}
           {!restaurant.cuisine && !restaurant.address && restaurant.lat === null && (
@@ -62,7 +62,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
           target="_blank"
           rel="noreferrer"
           aria-label={`${restaurant.name} in Google Maps öffnen`}
-          className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-accent"
+          className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink"
         >
           <Navigation className="size-4" />
         </a>

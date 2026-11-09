@@ -30,7 +30,7 @@ export function NotesForm({ restaurantId, notes }: { restaurantId: number; notes
         rows={3}
         placeholder="z. B. „Unbedingt das Tiramisu“ oder „Vorher reservieren“"
         aria-label="Notizen"
-        className="w-full resize-none rounded-2xl border border-line bg-surface px-4 py-3 min-h-[5rem] outline-none [field-sizing:content] placeholder:text-muted/70 focus:border-accent"
+        className="w-full resize-none rounded-2xl border border-line bg-surface px-4 py-3 min-h-[5rem] outline-none [field-sizing:content] placeholder:text-muted/70 focus:border-ink"
       />
       {(changed || pending) && (
         <button

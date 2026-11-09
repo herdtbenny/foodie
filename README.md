@@ -1,6 +1,6 @@
 # Foodie
 
-Restaurant-Liste für Benny & Lisa: Wunschliste, Bewertungen (1–10, jeder für sich) und eine Karte mit allen Einträgen. Schwester-App vom Kochbuch, mit eigener Datenbank.
+Restaurant-Liste für German & Evelyne: Wunschliste, Bewertungen (1–10, jeder für sich) und eine Karte mit allen Einträgen. Schwester-App vom Kochbuch, mit eigener Datenbank.
 
 ## Funktionen
 
@@ -8,7 +8,7 @@ Restaurant-Liste für Benny & Lisa: Wunschliste, Bewertungen (1–10, jeder für
 - **Besucht**: jeder bewertet von 1–10, Durchschnitt, Sortierung nach Note, Datum, Name
 - **Google-Maps-Link** einfügen (auch Kurzlinks `maps.app.goo.gl` und geteilter Text vom iPhone) → Name, Adresse und Position werden übernommen; ohne Koordinaten wird die Adresse über OpenStreetMap gesucht
 - **Karte** (Leaflet + OpenStreetMap) mit allen Einträgen, Filter Besucht/Wunschliste
-- Kein Passwort: beim Öffnen wählt man „Benny“ oder „Lisa“ (Sitzungs-Cookie)
+- Kein Passwort: beim Öffnen wählt man „German“ oder „Evelyne“ (Sitzungs-Cookie)
 
 ## Tech-Stack
 

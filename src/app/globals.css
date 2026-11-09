@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #fbf7f0;
+  /* Schwarz-weiß wie eine Speisekarte, Farbe nur für die zwei Personen */
+  --paper: #f4f4f2;
   --surface: #ffffff;
-  --ink: #2a2420;
-  --muted: #7a6e64;
-  --line: #e9e0d4;
-  --accent: #c8502a;
+  --ink: #141414;
+  --muted: #6e6e6a;
+  --line: #e2e2de;
+  --accent: #141414;
   --accent-ink: #ffffff;
-  --benny: #3f7a57;
-  --lisa: #b8406f;
+  --german: #2457d6;
+  --evelyne: #c2305f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #171310;
-    --surface: #221d19;
-    --ink: #f2ebe2;
-    --muted: #a59789;
-    --line: #3a322b;
-    --accent: #e0693f;
-    --accent-ink: #1b1512;
-    --benny: #6fb08a;
-    --lisa: #e37aa3;
+    --paper: #0f0f0f;
+    --surface: #191919;
+    --ink: #f1f1ef;
+    --muted: #9a9a95;
+    --line: #2c2c2a;
+    --accent: #f1f1ef;
+    --accent-ink: #111111;
+    --german: #6f95ff;
+    --evelyne: #ff7aa2;
   }
 }
 
@@ -34,10 +35,16 @@
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
-  --color-benny: var(--benny);
-  --color-lisa: var(--lisa);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-fraunces);
+  --color-german: var(--german);
+  --color-evelyne: var(--evelyne);
+  --font-sans: var(--font-archivo);
+  --font-display: var(--font-archivo);
+}
+
+/* Überschriften: dieselbe Schrift, schmal und kräftig */
+.font-display {
+  font-stretch: 72%;
+  letter-spacing: -0.005em;
 }
 
 /* Nie seitlich scrollen – `clip` statt `hidden`, damit fixed/sticky weiter funktioniert */
@@ -46,8 +53,6 @@ body {
   overflow-x: clip;
 }
 
-/* Papierfarbe nur auf <html>: reicht hinter die Safari-Leisten. <body> bleibt durchsichtig,
-   sonst verdeckt es das Hintergrundbild (das mit -z-10 hinter dem Inhalt liegt). */
 html {
   background: var(--paper);
 }
@@ -94,8 +99,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 9999px;
-  font: 600 13px/1 var(--font-inter), system-ui, sans-serif;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+  font: 700 13px/1 var(--font-archivo), system-ui, sans-serif;
   border: 2px solid var(--surface);
   font-variant-numeric: tabular-nums;
 }
@@ -123,12 +127,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font: 14px/1.35 var(--font-inter), system-ui, sans-serif;
+  font: 14px/1.35 var(--font-archivo), system-ui, sans-serif;
   min-width: 140px;
 }
 .foodie-popup strong {
-  font-family: var(--font-fraunces), serif;
-  font-size: 16px;
+  font-size: 17px;
+  font-stretch: 72%;
 }
 .foodie-popup span {
   color: var(--muted);
@@ -146,7 +150,7 @@ body {
   cursor: pointer;
 }
 .leaflet-container {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -37,7 +37,7 @@ export function Toaster() {
           {t.kind === "error" ? (
             <CircleAlert className="size-4 shrink-0" />
           ) : (
-            <CircleCheck className="size-4 shrink-0 text-benny" />
+            <CircleCheck className="size-4 shrink-0 text-german" />
           )}
           {t.message}
         </div>

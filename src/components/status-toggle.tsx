@@ -41,7 +41,7 @@ export function StatusToggle({ restaurantId, status }: { restaurantId: number; s
       type="button"
       onClick={() => change("besucht")}
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink shadow-md disabled:opacity-70"
+      className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink disabled:opacity-70"
     >
       {pending ? <LoaderCircle className="size-5 animate-spin" /> : <PartyPopper className="size-5" />}
       Waren wir da!

@@ -23,7 +23,7 @@ type ExistingRestaurant = {
 };
 
 const inputClass =
-  "w-full rounded-2xl border border-line bg-surface px-4 py-3 outline-none placeholder:text-muted/70 focus:border-accent";
+  "w-full rounded-2xl border border-line bg-surface px-4 py-3 outline-none placeholder:text-muted/70 focus:border-ink";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -167,7 +167,7 @@ export function RestaurantForm({
           )}
           {linkState === "found" && (
             <>
-              <MapPin className="size-3.5 text-benny" /> Position gefunden
+              <MapPin className="size-3.5 text-german" /> Position gefunden
             </>
           )}
           {linkState === "nocoords" && (
@@ -179,7 +179,7 @@ export function RestaurantForm({
           {linkState === "idle" &&
             (coords ? (
               <>
-                <MapPin className="size-3.5 text-benny" /> Position gespeichert
+                <MapPin className="size-3.5 text-german" /> Position gespeichert
               </>
             ) : (
               <>Optional – ohne Link wird die Adresse gesucht.</>
@@ -284,7 +284,7 @@ export function RestaurantForm({
       </Field>
 
       {error && (
-        <p role="alert" className="text-sm text-accent">
+        <p role="alert" className="text-sm text-red-600">
           {error}
         </p>
       )}
@@ -292,7 +292,7 @@ export function RestaurantForm({
       <button
         type="submit"
         disabled={pending || linkState === "loading"}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink shadow-md disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3.5 font-semibold text-accent-ink disabled:opacity-60"
       >
         {pending && <LoaderCircle className="size-5 animate-spin" />}
         {pending ? "Speichern …" : restaurant ? "Speichern" : status === "besucht" ? "Eintragen & bewerten" : "Auf die Wunschliste"}
