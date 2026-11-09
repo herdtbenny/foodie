@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpDown, ListFilter, Search, X } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ListFilter, Search, X } from "lucide-react";
 import { formatPrice, PRICE_LEVELS } from "@/lib/price";
 import { useMemo, useState } from "react";
 import { categoryAverage, type Category, type RestaurantSummary, type Status } from "@/lib/restaurants";
@@ -104,7 +104,7 @@ export function RestaurantList({
           onChange={(e) => setQ(e.target.value)}
           placeholder="Suchen: Name oder Küche …"
           aria-label="Suchen"
-          className="min-w-0 flex-1 bg-transparent py-1.5 pl-1.5 outline-none placeholder:text-muted/70 [&::-webkit-search-cancel-button]:hidden"
+          className="min-w-0 flex-1 bg-transparent py-2 pl-1.5 outline-none placeholder:text-muted/70 [&::-webkit-search-cancel-button]:hidden"
         />
         {q && (
           <button
@@ -116,10 +116,18 @@ export function RestaurantList({
             <X className="size-4" />
           </button>
         )}
+      </div>
 
-        {/* Natives <select> liegt unsichtbar über dem Button: öffnet auf dem iPhone das System-Menü */}
+      {/* Zwei Chips unter der Suche, natives <select> liegt unsichtbar darüber (System-Menü auf dem iPhone) */}
+      <div className={`-mt-2 grid gap-1.5 ${(cuisines.length > 0 || orderedCount > 0 || prices.length > 0) ? "grid-cols-2" : "grid-cols-1"}`}>
         {(cuisines.length > 0 || orderedCount > 0 || prices.length > 0) && (
-          <MenuButton label="Filtern" icon={ListFilter} active={!!filter}>
+          <MenuChip
+            label="Filtern"
+            icon={ListFilter}
+            value={filter ? filterValue : "Alle"}
+            active={!!filter}
+            onClear={() => setFilter("")}
+          >
             <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtern" className={nativeSelect}>
               <option value="">Alle anzeigen ({restaurants.length})</option>
               {orderedCount > 0 && (
@@ -147,10 +155,16 @@ export function RestaurantList({
                 </optgroup>
               )}
             </select>
-          </MenuButton>
+          </MenuChip>
         )}
 
-        <MenuButton label="Sortieren" icon={ArrowUpDown} active={sort !== sorts[0].key}>
+        <MenuChip
+          label="Sortieren"
+          icon={ArrowUpDown}
+          value={sorts.find((s) => s.key === sort)?.label ?? sorts[0].label}
+          active={sort !== sorts[0].key}
+          onClear={() => setSort(sorts[0].key)}
+        >
           <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sortieren" className={nativeSelect}>
             {sorts.map((s) => (
               <option key={s.key} value={s.key}>
@@ -158,33 +172,8 @@ export function RestaurantList({
               </option>
             ))}
           </select>
-        </MenuButton>
+        </MenuChip>
       </div>
-
-      {(filter || sort !== sorts[0].key) && (
-        <div className="flex flex-wrap gap-1.5">
-          {filter && (
-            <button
-              type="button"
-              onClick={() => setFilter("")}
-              className="press inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm text-paper"
-            >
-              {filterValue}
-              <X className="size-3.5" />
-            </button>
-          )}
-          {sort !== sorts[0].key && (
-            <button
-              type="button"
-              onClick={() => setSort(sorts[0].key)}
-              className="press inline-flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-muted"
-            >
-              {sorts.find((s) => s.key === sort)?.label}
-              <X className="size-3.5" />
-            </button>
-          )}
-        </div>
-      )}
 
       {shown.length ? (
         <ul className="space-y-2">
@@ -203,26 +192,44 @@ export function RestaurantList({
 
 const nativeSelect = "absolute inset-0 size-full cursor-pointer appearance-none rounded-full opacity-0";
 
-function MenuButton({
+/** Chip mit Icon und aktueller Auswahl; aktiv = dunkel mit X zum Zurücksetzen */
+function MenuChip({
   label,
   icon: Icon,
+  value,
   active,
+  onClear,
   children,
 }: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  value: string;
   active: boolean;
+  onClear: () => void;
   children: React.ReactNode;
 }) {
   return (
     <span
       title={label}
-      className={`relative flex size-9 shrink-0 items-center justify-center rounded-full transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
-        active ? "bg-ink text-paper" : "text-muted hover:text-ink"
+      className={`press relative flex min-w-0 items-center gap-1.5 rounded-full py-2.5 pr-2.5 pl-3.5 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ink ${
+        active ? "glass-ink" : "glass text-ink"
       }`}
     >
-      <Icon className="size-[18px]" />
+      <Icon className="size-4 shrink-0 opacity-70" />
+      <span className="min-w-0 flex-1 truncate">{value}</span>
       {children}
+      {active ? (
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label={`${label} zurücksetzen`}
+          className="relative z-10 -my-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-white/15"
+        >
+          <X className="size-3.5" />
+        </button>
+      ) : (
+        <ChevronDown className="size-3.5 shrink-0 opacity-60" />
+      )}
     </span>
   );
 }
