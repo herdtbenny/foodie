@@ -1,4 +1,4 @@
-import { MapPin, Navigation } from "lucide-react";
+import { CalendarDays, MapPin, Navigation } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
 import type { RestaurantSummary } from "@/lib/restaurants";
@@ -38,7 +38,10 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
           )}
         </p>
         {visited && restaurant.visitedOn && (
-          <p className="text-xs text-muted">{formatDate(restaurant.visitedOn)}</p>
+          <p className="inline-flex items-center gap-1 text-xs text-muted">
+            <CalendarDays className="size-3 shrink-0" aria-label="Zuletzt besucht" />
+            {formatDate(restaurant.visitedOn)}
+          </p>
         )}
       </div>
 
