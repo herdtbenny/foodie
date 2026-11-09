@@ -1,8 +1,10 @@
-import { ArrowLeft, MapPin, Navigation, Pencil } from "lucide-react";
+import { ArrowLeft, MapPin, Navigation } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
+import { DeleteButton } from "@/components/delete-button";
 import { NotesForm } from "@/components/notes-form";
+import { EditableTitle, RestaurantInfo } from "@/components/restaurant-info";
 import { PersonReview } from "@/components/person-review";
 import { VisitedDate } from "@/components/visited-date";
 import { CategoryRating } from "@/components/category-rating";
@@ -12,7 +14,7 @@ import { StatusToggle } from "@/components/status-toggle";
 import { requirePerson } from "@/lib/auth";
 import { avatarUrls } from "@/lib/avatars";
 import { PEOPLE, PERSON_IDS } from "@/lib/people";
-import { getRestaurant, weightPercent } from "@/lib/restaurants";
+import { getRestaurant, listRestaurants, valuesOf, weightPercent } from "@/lib/restaurants";
 
 export async function generateMetadata({ params }: PageProps<"/restaurants/[id]">) {
   const { id } = await params;
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/restaurants/[id]"
 
 export default async function RestaurantPage({ params }: PageProps<"/restaurants/[id]">) {
   const [{ id }, person] = await Promise.all([params, requirePerson()]);
-  const restaurant = await getRestaurant(Number(id));
+  const [restaurant, { restaurants: all }] = await Promise.all([getRestaurant(Number(id)), listRestaurants()]);
   if (!restaurant) notFound();
 
   const visited = restaurant.status === "besucht";
@@ -32,23 +34,15 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
   return (
     <article className="space-y-5">
-      <div className="flex items-center justify-between">
-        <Link href={visited ? "/" : "/wunschliste"} className="inline-flex items-center gap-1.5 text-sm text-muted">
-          <ArrowLeft className="size-4" />
-          {visited ? "Besucht" : "Wunschliste"}
-        </Link>
-        <Link
-          href={`/restaurants/${restaurant.id}/bearbeiten`}
-          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm"
-        >
-          <Pencil className="size-3.5" />
-          Bearbeiten
-        </Link>
-      </div>
+      <Link href={visited ? "/" : "/wunschliste"} className="inline-flex items-center gap-1.5 text-sm text-muted">
+        <ArrowLeft className="size-4" />
+        {visited ? "Bisherige" : "Wunschliste"}
+      </Link>
 
       <header className="-mt-1 space-y-1">
         {/* Kompakt: Titel, darunter Art · Küche und Adresse – keine leeren Zeilen */}
-        <h1 className="font-display text-4xl leading-tight font-semibold text-balance">{restaurant.name}</h1>
+        <h1 className="sr-only">{restaurant.name}</h1>
+        <EditableTitle id={restaurant.id} name={restaurant.name} />
         {(restaurant.kind || restaurant.cuisine || !visited) && (
           <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
             {[!visited && "Wunschliste", restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ")}
@@ -168,10 +162,22 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         </section>
       )}
 
+      <RestaurantInfo
+        id={restaurant.id}
+        kind={restaurant.kind}
+        cuisine={restaurant.cuisine}
+        address={restaurant.address}
+        mapsUrl={restaurant.mapsUrl}
+        kinds={valuesOf(all, "kind")}
+        cuisines={valuesOf(all, "cuisine")}
+      />
+
       <section className="space-y-3">
         <h2 className="font-display text-2xl font-semibold">Notizen</h2>
         <NotesForm restaurantId={restaurant.id} notes={restaurant.notes} />
       </section>
+
+      <DeleteButton id={restaurant.id} title={restaurant.name} />
     </article>
   );
 }

@@ -62,9 +62,10 @@ html {
 
 /* iOS zoomt bei Eingabefeldern unter 16px hinein und die Seite wird seitlich verschiebbar */
 @media (max-width: 640px) {
-  input,
+  /* Große Felder (z. B. der Titel) sind ohnehin über 16px und behalten ihre Größe */
+  input:not([data-large]),
   select,
-  textarea {
+  textarea:not([data-large]) {
     font-size: 16px !important;
   }
 }

@@ -137,6 +137,60 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
   return { id: created.id };
 }
 
+export type RestaurantPatch = Partial<{
+  name: string;
+  kind: string | null;
+  cuisine: string | null;
+  address: string | null;
+  mapsUrl: string | null;
+}>;
+
+/**
+ * Einzelne Felder direkt auf der Detailseite ändern.
+ * Neuer Maps-Link oder neue Adresse → Position wird neu gesucht.
+ */
+export async function updateRestaurant(id: number, patch: RestaurantPatch) {
+  await requirePerson();
+  const db = getDb();
+  const [current] = await db.select().from(restaurants).where(eq(restaurants.id, id));
+  if (!current) throw new Error("Restaurant nicht gefunden");
+
+  const clean = (v: string | null | undefined) => (typeof v === "string" ? v.trim().slice(0, 300) || null : null);
+  const values: Partial<typeof restaurants.$inferInsert> = {};
+  if ("name" in patch) {
+    const name = clean(patch.name);
+    if (!name) throw new Error("Name fehlt");
+    values.name = name;
+  }
+  if ("kind" in patch) values.kind = clean(patch.kind);
+  if ("cuisine" in patch) values.cuisine = clean(patch.cuisine);
+  if ("address" in patch) values.address = clean(patch.address);
+  if ("mapsUrl" in patch) values.mapsUrl = clean(patch.mapsUrl);
+
+  if ("mapsUrl" in patch && values.mapsUrl) {
+    const info = await lookupMaps(values.mapsUrl);
+    if (info) {
+      values.mapsUrl = info.mapsUrl;
+      if (info.lat != null && info.lng != null) {
+        values.lat = info.lat;
+        values.lng = info.lng;
+      }
+      if (!current.address && info.address) values.address = info.address;
+    }
+  } else if ("address" in patch && values.address && !current.mapsUrl) {
+    // Ohne Maps-Link: Position aus der Adresse
+    const hit = await geocodeFirst([[current.name, values.address], [values.address]]);
+    if (hit) {
+      values.lat = hit.lat;
+      values.lng = hit.lng;
+    }
+  }
+
+  await db.update(restaurants).set(values).where(eq(restaurants.id, id));
+  refresh();
+  return { lat: values.lat ?? current.lat, lng: values.lng ?? current.lng, address: values.address ?? current.address };
+}
+
 export async function deleteRestaurant(id: number) {
   await requirePerson();
   const db = getDb();

@@ -79,7 +79,7 @@ export function MapExplorer({
             {missing.map((r) => (
               <li key={r.id}>
                 <Link
-                  href={`/restaurants/${r.id}/bearbeiten`}
+                  href={`/restaurants/${r.id}`}
                   className="inline-block rounded-full border border-line px-3 py-1 text-sm"
                 >
                   {r.name}
