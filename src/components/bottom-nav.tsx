@@ -10,7 +10,7 @@ const itemClass =
 export function BottomNav() {
   const pathname = usePathname();
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
-  const tone = (href: string) => (active(href) ? "text-accent" : "text-muted");
+  const tone = (href: string) => (active(href) ? "text-pop" : "text-muted");
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 px-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-4">

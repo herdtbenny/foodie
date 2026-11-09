@@ -3,13 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/delete-button";
 import { RestaurantForm } from "@/components/restaurant-form";
-import { cuisinesOf, getRestaurant, listRestaurants } from "@/lib/restaurants";
+import { getRestaurant, listRestaurants, valuesOf } from "@/lib/restaurants";
 
 export const metadata = { title: "Bearbeiten · Foodie" };
 
 export default async function EditPage({ params }: PageProps<"/restaurants/[id]/bearbeiten">) {
   const { id } = await params;
-  const [restaurant, all] = await Promise.all([getRestaurant(Number(id)), listRestaurants()]);
+  const [restaurant, { restaurants: all }] = await Promise.all([getRestaurant(Number(id)), listRestaurants()]);
   if (!restaurant) notFound();
 
   return (
@@ -19,7 +19,7 @@ export default async function EditPage({ params }: PageProps<"/restaurants/[id]/
         Zurück
       </Link>
       <h1 className="font-display text-3xl font-semibold">Bearbeiten</h1>
-      <RestaurantForm restaurant={restaurant} cuisines={cuisinesOf(all)} />
+      <RestaurantForm restaurant={restaurant} cuisines={valuesOf(all, "cuisine")} kinds={valuesOf(all, "kind")} />
       <DeleteButton id={restaurant.id} title={restaurant.name} />
     </div>
   );

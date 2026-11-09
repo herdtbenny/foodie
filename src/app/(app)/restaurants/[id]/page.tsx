@@ -1,9 +1,9 @@
-import { ArrowLeft, Calendar, MapPin, Navigation, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Navigation, Pencil, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { NotesForm } from "@/components/notes-form";
-import { RatingSlider } from "@/components/rating-slider";
+import { CategoryRating } from "@/components/category-rating";
 import { RestaurantMap } from "@/components/restaurant-map";
 import { formatScore } from "@/components/score";
 import { StatusToggle } from "@/components/status-toggle";
@@ -11,7 +11,7 @@ import { requirePerson } from "@/lib/auth";
 import { avatarUrls } from "@/lib/avatars";
 import { formatDate } from "@/lib/format-date";
 import { PEOPLE, PERSON_IDS } from "@/lib/people";
-import { averageScore, getRestaurant } from "@/lib/restaurants";
+import { getRestaurant, weightPercent } from "@/lib/restaurants";
 
 export async function generateMetadata({ params }: PageProps<"/restaurants/[id]">) {
   const { id } = await params;
@@ -25,7 +25,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   if (!restaurant) notFound();
 
   const visited = restaurant.status === "besucht";
-  const average = averageScore(restaurant.scores);
+  const average = restaurant.overall;
   const avatars = avatarUrls();
   const hasCoords = restaurant.lat != null && restaurant.lng != null;
 
@@ -47,7 +47,11 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
 
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-          {restaurant.cuisine && <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">{restaurant.cuisine}</p>}
+          {[restaurant.kind, restaurant.cuisine].filter(Boolean).length > 0 && (
+            <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+              {[restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ")}
+            </p>
+          )}
           {visited && restaurant.visitedOn && (
             <p className="inline-flex items-center gap-1 text-muted">
               <Calendar className="size-3.5" />
@@ -101,31 +105,59 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
       )}
 
       {visited ? (
-        <section className="space-y-3">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-2xl font-semibold">Bewertung</h2>
-            {average !== null && (
-              <p className="text-sm text-muted">
-                Zusammen <span className="font-semibold text-ink tabular-nums">{formatScore(average)}/10</span>
-              </p>
-            )}
+        <section className="space-y-4">
+          {/* Gesamtnote */}
+          <div className="flex items-center gap-4 rounded-3xl bg-ink p-4 text-paper">
+            <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-full bg-pop text-white">
+              <span className="font-display text-3xl leading-none font-semibold tabular-nums">
+                {average !== null ? formatScore(average) : "–"}
+              </span>
+              <span className="text-[10px] opacity-80">gesamt</span>
+            </div>
+            <div className="min-w-0 flex-1 space-y-1.5">
+              {PERSON_IDS.map((p) => (
+                <div key={p} className="flex items-center gap-2">
+                  <Avatar person={p} url={avatars[p]} className="size-6 text-[10px]" />
+                  <span className="flex-1 text-sm">{PEOPLE[p].name}</span>
+                  <span className="font-semibold tabular-nums">
+                    {restaurant.scores[p] != null ? formatScore(restaurant.scores[p]!) : "–"}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="space-y-5 rounded-3xl border border-line bg-surface p-4">
-            {PERSON_IDS.map((p) => (
-              <RatingSlider
-                key={p}
+
+          {/* Kategorien */}
+          <div className="space-y-6 rounded-3xl border border-line bg-surface p-4">
+            {restaurant.categories.length === 0 && (
+              <p className="text-sm text-muted">Noch keine Kategorien angelegt.</p>
+            )}
+            {restaurant.categories.map((cat) => (
+              <CategoryRating
+                key={`${cat.id}-${restaurant.ratings[cat.id]?.[person] ?? ""}`}
                 restaurantId={restaurant.id}
-                score={restaurant.scores[p]}
-                label={p === person ? "Du" : PEOPLE[p].name}
-                editable={p === person}
-                colorClass={PEOPLE[p].text}
-                bgClass={PEOPLE[p].bg}
-                softClass={PEOPLE[p].soft}
-                avatar={<Avatar person={p} url={avatars[p]} className="size-8 text-xs" />}
+                categoryId={cat.id}
+                name={cat.name}
+                percent={weightPercent(restaurant.categories, cat)}
+                person={person}
+                own={restaurant.ratings[cat.id]?.[person]}
+                others={PERSON_IDS.filter((p) => p !== person).map((p) => ({
+                  person: p,
+                  score: restaurant.ratings[cat.id]?.[p],
+                }))}
               />
             ))}
           </div>
-          <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />
+            <Link
+              href="/kategorien"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm text-muted"
+            >
+              <SlidersHorizontal className="size-3.5" />
+              Kategorien & Gewichtung
+            </Link>
+          </div>
         </section>
       ) : (
         <StatusToggle restaurantId={restaurant.id} status={restaurant.status} />

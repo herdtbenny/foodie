@@ -1,14 +1,14 @@
 import { MapExplorer } from "@/components/map-explorer";
 import { formatScore } from "@/components/score";
-import { averageScore, listRestaurants } from "@/lib/restaurants";
+import { listRestaurants } from "@/lib/restaurants";
 
 export const metadata = { title: "Karte · Foodie" };
 
 export default async function MapPage() {
-  const all = await listRestaurants();
+  const { restaurants: all } = await listRestaurants();
   const points = all.flatMap((r) => {
     if (r.lat == null || r.lng == null) return [];
-    const average = averageScore(r.scores);
+    const average = r.overall;
     return [
       {
         id: r.id,
@@ -17,7 +17,7 @@ export default async function MapPage() {
         lng: r.lng,
         status: r.status,
         score: average !== null ? formatScore(average) : null,
-        subtitle: [r.cuisine, r.status === "wunsch" ? "Wunschliste" : average !== null ? `${formatScore(average)}/10` : null]
+        subtitle: [r.kind, r.cuisine, r.status === "wunsch" ? "Wunschliste" : average !== null ? `${formatScore(average)}/10` : null]
           .filter(Boolean)
           .join(" · ") || null,
       },

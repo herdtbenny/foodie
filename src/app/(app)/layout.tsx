@@ -1,4 +1,4 @@
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { BottomNav } from "@/components/bottom-nav";
@@ -19,6 +19,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           <img src="/icon.svg" alt="" className="size-8 shrink-0 rounded-xl ring-1 ring-line" />
           <span className="font-display text-2xl leading-tight font-semibold tracking-tight">Foodie</span>
         </Link>
+        <div className="flex shrink-0 items-center gap-2">
+        <Link
+          href="/kategorien"
+          aria-label="Kategorien & Gewichtung"
+          className="flex size-8 items-center justify-center rounded-full border border-line bg-surface text-muted"
+        >
+          <SlidersHorizontal className="size-4" />
+        </Link>
         <form action={switchPerson}>
           <button
             type="submit"
@@ -30,6 +38,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <ArrowLeftRight className="size-3.5" />
           </button>
         </form>
+        </div>
       </header>
       <main className="flex-1 px-2 pb-36 sm:px-4">{children}</main>
       <Toaster />

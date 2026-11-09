@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { readSession, SESSION_COOKIE } from "@/lib/session";
+import { AUTH_COOKIE, PERSON_COOKIE, readPerson, verifyAuth } from "@/lib/session";
 
-/** Wer noch nicht gewählt hat, ob German oder Evelyne, landet bei der Auswahl. */
-export function proxy(request: NextRequest) {
-  if (!readSession(request.cookies.get(SESSION_COOKIE)?.value)) {
+/** Ohne Passwort oder ohne Auswahl „Wer bist du?“ geht's zur Anmeldung. */
+export async function proxy(request: NextRequest) {
+  const authed = await verifyAuth(request.cookies.get(AUTH_COOKIE)?.value);
+  if (!authed || !readPerson(request.cookies.get(PERSON_COOKIE)?.value)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 }

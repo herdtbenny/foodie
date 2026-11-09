@@ -5,10 +5,12 @@ Restaurant-Liste für German & Evelyne: Wunschliste, Bewertungen (1–10, jeder 
 ## Funktionen
 
 - **Wunschliste**: Restaurants, in die ihr mal wollt
-- **Besucht**: jeder bewertet von 1–10, Durchschnitt, Sortierung nach Note, Datum, Name
+- **Besucht**: jeder bewertet jede Kategorie (Ambiente, Preis-Leistung, Geschmack, eigene) von 1–10
+- **Gesamtnote**: gewichteter Schnitt der Kategorien je Person, Gewichtung auf der Seite „Kategorien“
+- **Art** (Frühstück, Café, Abendessen, Bar, Bestellung …) und Küche als Filter
 - **Google-Maps-Link** einfügen (auch Kurzlinks `maps.app.goo.gl` und geteilter Text vom iPhone) → Name, Adresse und Position werden übernommen; ohne Koordinaten wird die Adresse über OpenStreetMap gesucht
 - **Karte** (Leaflet + OpenStreetMap) mit allen Einträgen, Filter Besucht/Wunschliste
-- Kein Passwort: beim Öffnen wählt man „German“ oder „Evelyne“ (Sitzungs-Cookie)
+- Gemeinsames Passwort (merkt sich jedes Gerät), bei jedem Öffnen wählt man „German“ oder „Evelyne“
 
 ## Tech-Stack
 

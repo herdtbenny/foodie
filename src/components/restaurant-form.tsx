@@ -13,6 +13,7 @@ type ExistingRestaurant = {
   id: number;
   name: string;
   cuisine: string | null;
+  kind: string | null;
   address: string | null;
   mapsUrl: string | null;
   lat: number | null;
@@ -43,10 +44,12 @@ type LinkState = "idle" | "loading" | "found" | "nocoords" | "invalid";
 export function RestaurantForm({
   restaurant,
   cuisines,
+  kinds,
   defaultStatus = "wunsch",
 }: {
   restaurant?: ExistingRestaurant;
   cuisines: string[];
+  kinds: string[];
   defaultStatus?: Status;
 }) {
   const router = useRouter();
@@ -56,6 +59,7 @@ export function RestaurantForm({
   const [mapsUrl, setMapsUrl] = useState(restaurant?.mapsUrl ?? "");
   const [name, setName] = useState(restaurant?.name ?? "");
   const [address, setAddress] = useState(restaurant?.address ?? "");
+  const [kind, setKind] = useState(restaurant?.kind ?? "");
   const [status, setStatus] = useState<Status>(restaurant?.status ?? defaultStatus);
   const [coords, setCoords] = useState<Coords>(
     restaurant?.lat != null && restaurant.lng != null ? { lat: restaurant.lat, lng: restaurant.lng } : null,
@@ -131,6 +135,7 @@ export function RestaurantForm({
       <input type="hidden" name="lat" value={coords?.lat ?? ""} />
       <input type="hidden" name="lng" value={coords?.lng ?? ""} />
       <input type="hidden" name="status" value={status} />
+      <input type="hidden" name="kind" value={kind} />
 
       {/* Google-Maps-Link zuerst – füllt den Rest aus */}
       <div className="space-y-2 rounded-3xl border border-line bg-surface p-4">
@@ -205,6 +210,27 @@ export function RestaurantForm({
           className={inputClass}
         />
       </Field>
+
+      <fieldset>
+        <legend className="mb-1.5 flex w-full items-baseline justify-between text-sm font-medium">
+          Art <span className="text-xs font-normal text-muted">optional</span>
+        </legend>
+        <div className="flex flex-wrap gap-1.5">
+          {kinds.map((k) => (
+            <button
+              key={k}
+              type="button"
+              aria-pressed={kind === k}
+              onClick={() => setKind(kind === k ? "" : k)}
+              className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
+                kind === k ? "border-ink bg-ink text-paper" : "border-line bg-surface text-muted"
+              }`}
+            >
+              {k}
+            </button>
+          ))}
+        </div>
+      </fieldset>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Küche" hint="optional">

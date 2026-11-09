@@ -22,7 +22,8 @@ const COPY = {
 
 /** Gemeinsame Seite für "Besucht" und "Wunschliste" */
 export async function ListPage({ status }: { status: Status }) {
-  const restaurants = (await listRestaurants()).filter((r) => r.status === status);
+  const { restaurants: all, categories } = await listRestaurants();
+  const restaurants = all.filter((r) => r.status === status);
   const copy = COPY[status];
   const Icon = copy.icon;
 
@@ -49,7 +50,7 @@ export async function ListPage({ status }: { status: Status }) {
           </Link>
         </div>
       ) : (
-        <RestaurantList restaurants={restaurants} status={status} />
+        <RestaurantList restaurants={restaurants} status={status} categories={categories} />
       )}
     </div>
   );

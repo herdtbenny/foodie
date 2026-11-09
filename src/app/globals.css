@@ -1,29 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* Schwarz-weiß wie eine Speisekarte, Farbe nur für die zwei Personen */
-  --paper: #f4f4f2;
-  --surface: #ffffff;
-  --ink: #141414;
-  --muted: #6e6e6a;
-  --line: #e2e2de;
-  --accent: #141414;
-  --accent-ink: #ffffff;
-  --german: #2457d6;
-  --evelyne: #c2305f;
+  /* Creme-Weiß als Grund, weiches Schwarz für Text und Buttons, Rot als Akzent */
+  --paper: #f6f1e7;
+  --surface: #fcf9f3;
+  --ink: #1d1b18;
+  --muted: #77706a;
+  --line: #e4dccd;
+  --accent: #1d1b18;
+  --accent-ink: #f6f1e7;
+  --pop: #d7392b;
+  --german: #2f5fb8;
+  --evelyne: #2f8a5f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0f0f0f;
-    --surface: #191919;
-    --ink: #f1f1ef;
-    --muted: #9a9a95;
-    --line: #2c2c2a;
-    --accent: #f1f1ef;
-    --accent-ink: #111111;
-    --german: #6f95ff;
-    --evelyne: #ff7aa2;
+    --paper: #171512;
+    --surface: #211e1a;
+    --ink: #f3ece0;
+    --muted: #a39a8e;
+    --line: #37322b;
+    --accent: #f3ece0;
+    --accent-ink: #1d1b18;
+    --pop: #ef5544;
+    --german: #7aa2ff;
+    --evelyne: #5fcf95;
   }
 }
 
@@ -35,6 +37,7 @@
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-pop: var(--pop);
   --color-german: var(--german);
   --color-evelyne: var(--evelyne);
   --font-sans: var(--font-archivo);
@@ -104,13 +107,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .foodie-pin.is-visited {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--pop);
+  color: #fff;
 }
 .foodie-pin.is-wish {
   background: var(--surface);
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--ink);
+  border-color: var(--ink);
 }
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {

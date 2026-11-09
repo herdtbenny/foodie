@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     // Home-Bildschirm-App startet immer bei "Wer bist du?"
     start_url: "/login",
     display: "standalone",
-    background_color: "#f4f4f2",
-    theme_color: "#f4f4f2",
+    background_color: "#f6f1e7",
+    theme_color: "#f6f1e7",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
       { src: "/apple-icon", sizes: "180x180", type: "image/png" },

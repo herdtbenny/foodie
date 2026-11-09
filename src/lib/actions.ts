@@ -1,16 +1,16 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, max } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requirePerson } from "./auth";
 import { getDb } from "./db";
-import { ratings, restaurants } from "./db/schema";
+import { categories, ratings, restaurants } from "./db/schema";
 import { todayBerlin } from "./format-date";
 import { geocodeFirst, lookupMaps, type MapsInfo } from "./maps";
 import { isPerson } from "./people";
-import { SESSION_COOKIE } from "./session";
+import { AUTH_COOKIE, PERSON_COOKIE, signAuth, verifyAuth } from "./session";
 import { toStatus, type Status } from "./restaurants";
 
 function text(formData: FormData, key: string) {
@@ -38,24 +38,37 @@ function refresh() {
   revalidatePath("/", "layout");
 }
 
-/** Auswahl "Wer bist du?" – ohne Passwort. */
-export async function choosePerson(formData: FormData) {
+export type LoginState = { error?: string };
+
+/** Anmeldung: Passwort (nur beim ersten Mal pro Gerät) + „Wer bist du?“ */
+export async function login(_: LoginState, formData: FormData): Promise<LoginState> {
   const person = formData.get("person");
-  if (!isPerson(person)) return;
+  if (!isPerson(person)) return { error: "Wer bist du?" };
+
   const store = await cookies();
-  store.set(SESSION_COOKIE, person, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    // Kein maxAge: Sitzungs-Cookie, beim nächsten Öffnen wird wieder gefragt
-  });
+  const secure = process.env.NODE_ENV === "production";
+  if (!(await verifyAuth(store.get(AUTH_COOKIE)?.value))) {
+    const password = formData.get("password");
+    if (!process.env.APP_PASSWORD || password !== process.env.APP_PASSWORD) {
+      return { error: "Das Passwort stimmt nicht." };
+    }
+    store.set(AUTH_COOKIE, await signAuth(), {
+      httpOnly: true,
+      secure,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+
+  // Kein maxAge: Sitzungs-Cookie, beim nächsten Öffnen wird wieder gefragt
+  store.set(PERSON_COOKIE, person, { httpOnly: true, secure, sameSite: "lax", path: "/" });
   redirect("/");
 }
 
 export async function switchPerson() {
   const store = await cookies();
-  store.delete(SESSION_COOKIE);
+  store.delete(PERSON_COOKIE);
   redirect("/login");
 }
 
@@ -94,6 +107,7 @@ export async function saveRestaurant(formData: FormData): Promise<{ error: strin
   const values = {
     name,
     cuisine: optionalText(formData, "cuisine"),
+    kind: optionalText(formData, "kind"),
     address,
     mapsUrl,
     lat,
@@ -128,18 +142,60 @@ export async function deleteRestaurant(id: number) {
   refresh();
 }
 
-/** Bewertung der eingeloggten Person setzen (1–10). Bewerten heißt: wir waren da. */
-export async function rateRestaurant(restaurantId: number, score: number) {
+/** Note der eingeloggten Person in einer Kategorie setzen (1–10), oder mit null entfernen. */
+export async function rateRestaurant(restaurantId: number, categoryId: number, score: number | null) {
   const person = await requirePerson();
-  if (!Number.isInteger(score) || score < 1 || score > 10) return;
   const db = getDb();
-  await db
-    .insert(ratings)
-    .values({ restaurantId, person, score })
-    .onConflictDoUpdate({
-      target: [ratings.restaurantId, ratings.person],
-      set: { score, updatedAt: new Date() },
-    });
+  if (score === null) {
+    await db
+      .delete(ratings)
+      .where(
+        and(eq(ratings.restaurantId, restaurantId), eq(ratings.categoryId, categoryId), eq(ratings.person, person)),
+      );
+  } else {
+    if (!Number.isInteger(score) || score < 1 || score > 10) return;
+    await db
+      .insert(ratings)
+      .values({ restaurantId, categoryId, person, score })
+      .onConflictDoUpdate({
+        target: [ratings.restaurantId, ratings.categoryId, ratings.person],
+        set: { score, updatedAt: new Date() },
+      });
+  }
+  refresh();
+}
+
+/** Neue Bewertungs-Kategorie anlegen */
+export async function addCategory(name: string) {
+  await requirePerson();
+  const value = name.trim().slice(0, 40);
+  if (!value) return;
+  const db = getDb();
+  const [{ last }] = await db.select({ last: max(categories.position) }).from(categories);
+  await db.insert(categories).values({ name: value, weight: 1, position: (last ?? -1) + 1 });
+  refresh();
+}
+
+export async function renameCategory(id: number, name: string) {
+  await requirePerson();
+  const value = name.trim().slice(0, 40);
+  if (!value) return;
+  await getDb().update(categories).set({ name: value }).where(eq(categories.id, id));
+  refresh();
+}
+
+/** Gewichtung 0–5 (0 = zählt nicht zur Gesamtnote) */
+export async function setCategoryWeight(id: number, weight: number) {
+  await requirePerson();
+  if (!Number.isInteger(weight) || weight < 0 || weight > 5) return;
+  await getDb().update(categories).set({ weight }).where(eq(categories.id, id));
+  refresh();
+}
+
+/** Löscht die Kategorie samt aller Noten darin */
+export async function deleteCategory(id: number) {
+  await requirePerson();
+  await getDb().delete(categories).where(eq(categories.id, id));
   refresh();
 }
 

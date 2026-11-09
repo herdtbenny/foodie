@@ -1,19 +1,20 @@
 import { Bookmark, MapPin, Navigation } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format-date";
-import { averageScore, type RestaurantSummary } from "@/lib/restaurants";
+import type { RestaurantSummary } from "@/lib/restaurants";
 import { formatScore, ScorePills } from "./score";
 
 /** Ein Restaurant in der Liste. Ganze Karte führt zur Detailseite, rechts geht's direkt zu Google Maps. */
 export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }) {
   const visited = restaurant.status === "besucht";
-  const average = averageScore(restaurant.scores);
+  const average = restaurant.overall;
+  const tags = [restaurant.kind, restaurant.cuisine].filter(Boolean).join(" · ");
 
   return (
     <div className="relative flex min-w-0 items-center gap-3 rounded-3xl border border-line bg-surface p-2 pr-3">
       <div
         className={`flex size-16 shrink-0 flex-col items-center justify-center rounded-2xl ${
-          visited ? "bg-accent text-accent-ink" : "border border-line text-muted"
+          visited ? (average !== null ? "bg-pop text-white" : "bg-ink text-paper") : "border border-line text-muted"
         }`}
       >
         {visited ? (
@@ -38,10 +39,9 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantSummary }
           {restaurant.name}
         </Link>
         <p className="flex min-w-0 items-center gap-1 text-xs text-muted">
-          {restaurant.cuisine && <span className="shrink-0 text-[11px] font-semibold tracking-wider text-muted uppercase">{restaurant.cuisine}</span>}
-          {restaurant.cuisine && restaurant.address && <span aria-hidden>·</span>}
-          {restaurant.address && <span className="truncate">{restaurant.address}</span>}
-          {!restaurant.cuisine && !restaurant.address && restaurant.lat === null && (
+          {tags && <span className="truncate text-[11px] font-semibold tracking-wider uppercase">{tags}</span>}
+          {!tags && restaurant.address && <span className="truncate">{restaurant.address}</span>}
+          {!tags && !restaurant.address && restaurant.lat === null && (
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3" />
               ohne Position
